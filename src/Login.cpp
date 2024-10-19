@@ -8,7 +8,20 @@ void Login::login(const HttpRequestPtr &req,
            std::string &&userId,
            const std::string &password)
 {
-    LOG_DEBUG<<"User "<<userId<<" login";
+    LOG_DEBUG<<"User "<<userId<<" try to login";
+
+    Json::Value ret;
+
+    if(userId.empty())
+    {
+        ret["success"] = "false";
+        auto resp=HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(k200OK);
+        resp->addHeader("Access-Control-Allow-Origin","*");
+
+        callback(resp);
+        return;
+    }
 
     auto json = req->getJsonObject();
 
@@ -48,8 +61,6 @@ void Login::login(const HttpRequestPtr &req,
         }    
     }
 
-    Json::Value ret;
-
     if(isVaild)
     {
         ret["success"] = "true";
@@ -64,8 +75,20 @@ void Login::login(const HttpRequestPtr &req,
             std::cout << "no token,send token" << std::endl;
             std::string token=drogon::utils::getUuid();
             session->insert("token",token);
+            session->insert("userId",userId);
 
             ret["token"]=token;
+            // const drogon::orm::Result &resultOfToken=clientPtr->execSqlSync("select * from token where id="+userId);
+            // if(resultOfToken.size()==0)
+            // {
+            //     std::cout<<"add a token to database\n";
+            //     clientPtr->execSqlSync("insert into token values("+userId+","+token+")");
+            // }
+            // else
+            // {
+            //     std::cout<<"update a token from database\n";
+            //     clientPtr->execSqlSync("update token set value="+token+" where id="+userId);
+            // }
         }
     }
     else
@@ -80,31 +103,45 @@ void Login::login(const HttpRequestPtr &req,
     callback(resp);
 }
 void Login::getInfo(const HttpRequestPtr &req,
-             std::function<void (const HttpResponsePtr &)> &&callback,
-             const std::string &token) const
+             std::function<void (const HttpResponsePtr &)> &&callback,const std::string &token) const
 {
     auto json = req->getJsonObject();
 
-    auto session=req->session();
     Json::Value ret;
 
-    if(session->find("token"))
+    if(token.empty())
     {
-        std::string token=session->get<std::string>("token");
-        std::cout << "has token:"<<token << std::endl;
-    }
-    else
-    {
-        std::cout << "no token,send token" << std::endl;
-        std::string token=drogon::utils::getUuid();
-        session->insert("token",token);
+        ret["success"] = "false";
+        auto resp=HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(k200OK);
+        resp->addHeader("Access-Control-Allow-Origin","*");
 
-        ret["token"]=token;
+        callback(resp);
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from token where value="+token);
+
+    // std::cout << result.size() << " rows selected!" << std::endl;
+    for (auto row : result)
+    {
+        const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where userId="+row["id"].as<std::string>());
+        for (auto _row : result)
+        {
+            ret["result"]="true";
+            ret["user_name"]=_row["name"].as<std::string>();
+            ret["role"]=_row["role"].as<int>();
+        }
+    }
+
+    if(!ret["result"])
+    {
+        ret["result"]="false";
     }
     
-    ret["result"]="ok";
-    ret["user_name"]="azh";
-    ret["gender"]=1;
     auto resp=HttpResponse::newHttpJsonResponse(ret);
+    resp->setStatusCode(k200OK);
+    resp->addHeader("Access-Control-Allow-Origin","*");
     callback(resp);
 }

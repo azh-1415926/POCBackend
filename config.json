@@ -1,0 +1,21 @@
+{
+  "db_clients":[
+      {
+        "name":"POC",
+        "rdbms": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "dbname": "POC",
+        "user": "debian-sys-maint",
+        "passwd": "kddOIiFp0KTUgbX6",
+        "is_fast": false,
+        "connection_number":1,
+        "filename": ""
+      }
+    ],
+    "app":{
+      "enable_session": true,
+      "session_timeout": 1800,
+      "session_max_age":1800
+    }
+}
