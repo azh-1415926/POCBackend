@@ -30,6 +30,24 @@ std::string compileCodeBy(const std::string& code,const std::string& func)
     std::string ret;
 
     Py_Initialize();
+    // 创建一个Python列表对象来存储sys.path  
+    PyObject *sys_path = PySys_GetObject("path");  
+    if (!sys_path) {  
+        PyErr_Print();  
+        Py_Finalize();  
+        return "";  
+    }  
+  
+    // 插入新的路径到sys.path中  
+    const char *new_path = "./res/script";  
+    PyObject *path_item = PyUnicode_FromString(new_path);  
+    if (!path_item) {  
+        PyErr_Print();  
+        Py_Finalize();  
+        return "";  
+    }  
+    PyList_Insert(sys_path, 0, path_item);  // 在列表的开头插入新路径  
+    Py_DECREF(path_item);  // 不再需要path_item的额外引用
     PyObject* pModule = PyImport_ImportModule("compile");
     if (pModule)
     {
@@ -70,6 +88,8 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
         LOG_DEBUG<<"User compile code.";
     }
 
+    Json::Value ret;
+
     auto str=req->getBody();
     
     if(!str.empty())
@@ -78,15 +98,13 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
 
         Json::Value code=toJson(str.data());
 
-        std::cout<<compileCodeBy("World","hello")<<"\n";
-        std::cout<<compileCodeBy(code["data"].asString(),"compileC")<<"\n";
+        // std::cout<<compileCodeBy("World","hello")<<"\n";
+        ret["output"]=compileCodeBy(code["data"].asString(),"compileC");
     }
     else
     {
         std::cout<<"Compile data is empty\n";
     }
-
-    Json::Value ret;
 
     auto resp=HttpResponse::newHttpJsonResponse(ret);
     resp->setStatusCode(k200OK);

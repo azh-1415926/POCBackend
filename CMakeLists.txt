@@ -16,10 +16,6 @@ add_executable(main main.cpp ${srcs})
 target_link_libraries(main PRIVATE Drogon::Drogon ${Python3_LIBRARIES})
 
 
-file(COPY config.json DESTINATION ${CMAKE_BINARY_DIR}/Debug)
-file(COPY config.json DESTINATION ${CMAKE_BINARY_DIR}/Release)
-file(COPY config.json DESTINATION ${CMAKE_BINARY_DIR})
-
-file(COPY tools/xc.exe DESTINATION ${CMAKE_BINARY_DIR}/Debug/tools)
-file(COPY tools/xc.exe DESTINATION ${CMAKE_BINARY_DIR}/Release/tools)
-file(COPY tools/xc.exe DESTINATION ${CMAKE_BINARY_DIR}/tools)
+file(COPY res DESTINATION ${CMAKE_BINARY_DIR}/Debug)
+file(COPY res DESTINATION ${CMAKE_BINARY_DIR}/Release)
+file(COPY res DESTINATION ${CMAKE_BINARY_DIR})
