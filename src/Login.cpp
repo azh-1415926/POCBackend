@@ -103,13 +103,13 @@ void Login::login(const HttpRequestPtr &req,
     callback(resp);
 }
 void Login::getInfo(const HttpRequestPtr &req,
-             std::function<void (const HttpResponsePtr &)> &&callback,const std::string &token) const
+             std::function<void (const HttpResponsePtr &)> &&callback,const std::string &userId) const
 {
     auto json = req->getJsonObject();
 
     Json::Value ret;
 
-    if(token.empty())
+    if(userId.empty())
     {
         ret["success"] = "false";
         auto resp=HttpResponse::newHttpJsonResponse(ret);
@@ -121,18 +121,14 @@ void Login::getInfo(const HttpRequestPtr &req,
     }
 
     auto clientPtr = drogon::app().getDbClient("POC");
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from token where value="+token);
 
-    // std::cout << result.size() << " rows selected!" << std::endl;
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id="+userId);
     for (auto row : result)
     {
-        const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where userId="+row["id"].as<std::string>());
-        for (auto _row : result)
-        {
-            ret["result"]="true";
-            ret["user_name"]=_row["name"].as<std::string>();
-            ret["role"]=_row["role"].as<int>();
-        }
+        ret["result"]="true";
+        ret["user_name"]=row["name"].as<std::string>();
+        ret["role"]=row["role"].as<int>();
     }
 
     if(!ret["result"])

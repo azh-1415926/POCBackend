@@ -10,7 +10,7 @@ class Login : public drogon::HttpController<Login>
     METHOD_LIST_BEGIN
     // use METHOD_ADD to add your custom processing function here;
     METHOD_ADD(Login::login,"/token?userId={1}&passwd={2}",Post);
-    METHOD_ADD(Login::getInfo,"/info?token={1}",Get);
+    METHOD_ADD(Login::getInfo,"/info?userId={1}",Get);
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
     void login(const HttpRequestPtr &req,
@@ -19,5 +19,5 @@ class Login : public drogon::HttpController<Login>
                const std::string &password);
     void getInfo(const HttpRequestPtr &req,
                  std::function<void (const HttpResponsePtr &)> &&callback,
-                 const std::string &token) const;
+                 const std::string &userId) const;
 };
