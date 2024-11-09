@@ -48,7 +48,7 @@ void Login::login(const HttpRequestPtr &req,
     //                                 std::cerr << "error:" << e.base().what() << std::endl;
     //                             });
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id="+userId);
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+userId+"'");
 
     // std::cout << result.size() << " rows selected!" << std::endl;
     for (auto row : result)
@@ -123,7 +123,7 @@ void Login::getInfo(const HttpRequestPtr &req,
     auto clientPtr = drogon::app().getDbClient("POC");
 
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id="+userId);
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+userId+"'");
     for (auto row : result)
     {
         ret["result"]="true";

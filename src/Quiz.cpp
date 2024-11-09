@@ -2,8 +2,6 @@
 
 void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback,const std::string& chapter)
 {
-    auto json = req->getJsonObject();
-
     Json::Value ret;
 
     if(chapter.empty())
