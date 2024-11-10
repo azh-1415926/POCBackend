@@ -112,3 +112,94 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
 
     callback(resp);
 }
+
+void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &studentId)
+{
+    Json::Value ret;
+
+    if(studentId.empty())
+    {
+        ret["count"]=0;
+        auto resp=HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(k200OK);
+        resp->addHeader("Access-Control-Allow-Origin","*");
+
+        callback(resp);
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from experiment_record where student_id='"+studentId+"'");
+
+    int count=result.size();
+
+    for (int i=0;i<count;i++)
+    {
+        Json::Value experiment;
+        
+        experiment["id"]=result.at(i)["id"].as<int>();
+        experiment["student_id"]=result.at(i)["student_id"].as<std::string>();
+        experiment["teacher_id"]=result.at(i)["teacher_id"].as<std::string>();
+        experiment["name"]=result.at(i)["name"].as<std::string>();
+        experiment["content"]=result.at(i)["content"].as<std::string>();
+        experiment["isfinish"]=result.at(i)["isfinish"].as<int>();
+        experiment["code"]=result.at(i)["code"].as<std::string>();
+
+        ret[std::to_string(i)]=experiment;
+    }
+
+    ret["count"]=count;
+    
+    auto resp=HttpResponse::newHttpJsonResponse(ret);
+    resp->setStatusCode(k200OK);
+    resp->addHeader("Access-Control-Allow-Origin","*");
+    callback(resp);
+}
+
+void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &experimentId)
+{
+    auto json=req->getJsonObject();
+
+    Json::Value ret;
+
+    auto str=req->getBody();
+
+    Json::Value code=toJson(str.data());
+
+    if(experimentId.empty()||str.empty())
+    {
+        ret["success"] = "false";
+        auto resp=HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(k200OK);
+        resp->addHeader("Access-Control-Allow-Origin","*");
+
+        callback(resp);
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    auto result=clientPtr->execSqlSync("select * from experiment_record where id="+experimentId);
+
+    bool isFound=false;
+
+    for (auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(!isFound)
+        ret["success"]="false";
+    else
+    {
+        clientPtr->execSqlSync("update experiment_record set code='"+code["data"].asString()+"'"+" where id="+experimentId);
+        clientPtr->execSqlSync("update experiment_record set isfinish=1 where id="+experimentId);
+        ret["success"]="true";
+    }
+    
+    auto resp=HttpResponse::newHttpJsonResponse(ret);
+    resp->setStatusCode(k200OK);
+    resp->addHeader("Access-Control-Allow-Origin","*");
+    callback(resp);
+}
