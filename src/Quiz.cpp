@@ -30,6 +30,7 @@ void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpRespo
         quiz["B"]=row["optionB"].as<std::string>();
         quiz["C"]=row["optionC"].as<std::string>();
         quiz["D"]=row["optionD"].as<std::string>();
+        quiz["answer"]=row["answer"].as<std::string>();
 
         ret[std::to_string(count)]=quiz;
 
