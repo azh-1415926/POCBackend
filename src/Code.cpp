@@ -25,7 +25,7 @@ Json::Value toJson(const std::string& str)
     return root;  
 }
 
-std::string compileCodeBy(const std::string& code,const std::string& func)
+std::string compileCodeBy(const std::string& func,const std::string& code,const std::string& input)
 {
     std::string ret;
 
@@ -54,7 +54,7 @@ std::string compileCodeBy(const std::string& code,const std::string& func)
         PyObject* pFunc = PyObject_GetAttrString(pModule, func.data());
         if (pFunc && PyCallable_Check(pFunc))
         {
-            PyObject* pResult = PyObject_CallFunction(pFunc, "s", code.c_str());
+            PyObject* pResult = PyObject_CallFunction(pFunc, "ss", code.c_str(),input.c_str());
             if (pResult)
             {
                 if (PyUnicode_Check(pResult))
@@ -99,7 +99,7 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
         Json::Value code=toJson(str.data());
 
         // std::cout<<compileCodeBy("World","hello")<<"\n";
-        ret["output"]=compileCodeBy(code["data"].asString(),"compileC");
+        ret["output"]=compileCodeBy("compileC",code["code"].asString(),code["input"].asString());
     }
     else
     {

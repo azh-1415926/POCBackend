@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include(D:/local/vs-toolchain.cmake)
+set(MYSQL_INCLUDE_DIRS /opt/homebrew/Cellar/mariadb/11.6.2/include)
+set(MYSQL_LIBRARIES "/opt/homebrew/Cellar/mariadb/11.6.2/lib/libmariadb.a;/opt/homebrew/Cellar/mariadb/11.6.2/lib/libmysqlclient.a;/opt/homebrew/Cellar/mariadb/11.6.2/lib/libmysqlservices.a")
 
 find_package(Drogon CONFIG REQUIRED)
 

@@ -6,8 +6,8 @@
         "host": "localhost",
         "port": 3306,
         "dbname": "POC",
-        "user": "debian-sys-maint",
-        "passwd": "kddOIiFp0KTUgbX6",
+        "user": "root",
+        "passwd": "azh123456",
         "is_fast": false,
         "connection_number":1,
         "filename": ""

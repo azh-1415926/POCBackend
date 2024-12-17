@@ -1,9 +1,11 @@
 import subprocess
 import uuid
 import os
+import subprocess
+import threading
 
 # c 解释器路径
-c_compiler = './tools/xc.exe'
+c_compiler = 'picoc'
   
 def generate_unique_string():  
     # 生成一个基于随机数的UUID（版本4）  
@@ -13,30 +15,43 @@ def generate_unique_string():
     unique_string = str(unique_uuid)  
       
     return unique_string
+ 
+def run_command_with_timeout(command, timeout,input=''):
+    """
+    Run a command with a timeout.
+ 
+    :param command: List of command arguments (e.g., ['ls', '-l'])
+    :param timeout: Timeout in seconds
+    :return: (stdout, stderr) if command completes within timeout, else None
+    """
 
-def remove_last_line(multi_line_text):  
-    """  
-    从包含多行文本的字符串中移除最后一行。  
-  
-    参数:  
-    multi_line_text (str): 包含多行文本的字符串。  
-  
-    返回:  
-    str: 移除最后一行后的字符串。  
-    """  
-    # 将字符串按行分割成列表  
-    lines = multi_line_text.splitlines()  
-      
-    # 如果列表不为空，则移除最后一个元素  
-    if lines:  
-        lines.pop()  
-      
-    # 将列表元素合并成一个字符串，每个元素之间用换行符分隔  
-    modified_text = '\n'.join(lines)  
-      
-    return modified_text 
+    try:
+        isTimeOut=False
+        
+        process = subprocess.Popen(command, stdin=subprocess.PIPE,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+ 
+        process.stdin.write(input.encode())
 
-def compileC(code):
+        def kill_process():
+            """A function that will be called if the timeout occurs."""
+            process.kill()
+            process.wait()  # Ensure the process is fully killed
+            raise Exception("Command timed out and was terminated.")
+    
+        timer = threading.Timer(timeout, kill_process)
+        timer.start()
+
+        stdout, stderr = process.communicate()  # Wait for the process to complete
+
+        timer.cancel()  # Cancel the timer if it hasn't already fired
+
+    except Exception as e:
+        return None, str(e)
+
+    return stdout.decode('utf-8'),None
+
+
+def compileC(code,input):
     uuid=generate_unique_string()
 
     source=uuid+".c"
@@ -45,15 +60,16 @@ def compileC(code):
     with open(source, 'w',encoding='utf-8') as file:
         file.write(code)
 
-    # 使用subprocess.run来执行命令，并捕获输出
-    result = subprocess.run([c_compiler, source],timeout=5, capture_output=True, text=True, check=True)
-
-    # 检查命令是否成功执行
-    ret=result.stdout
+    output, error = run_command_with_timeout([c_compiler, source], 2,input)
+ 
+    if output:
+        ret=output
+    if error:
+        ret=error
 
     os.remove(source)
-    
-    return remove_last_line(ret)
 
-def hello(str):
-    return "Hello "+str
+    if len(ret) > 256:
+        return ret[:256]
+    else:
+        return ret
