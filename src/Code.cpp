@@ -8,22 +8,7 @@
 
 #include <Python.h>
 
-Json::Value toJson(const std::string& str)
-{
-    Json::CharReaderBuilder readerBuilder;  
-    Json::Value root;  
-    std::string errs;  
-    std::istringstream s(str);  
-  
-    bool parsingSuccessful = Json::parseFromStream(readerBuilder, s, &root, &errs);  
-  
-    if (!parsingSuccessful)
-    {  
-        std::cerr << "Failed to parse JSON: " << errs << std::endl;  
-    }
-
-    return root;  
-}
+#include <Base.h>
 
 std::string compileCodeBy(const std::string& func,const std::string& code,const std::string& input)
 {
@@ -76,41 +61,29 @@ std::string compileCodeBy(const std::string& func,const std::string& code,const 
 
 void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResponsePtr&)>&& callback)
 {
-    auto session=req->session();
-
-    if(!session->find("token"))
+    auto str=req->getBody();
+    
+    if(str.empty())
     {
-        LOG_DEBUG<<"Not login,error request.";
-        // return;
+        azh::drogon::returnFalse(callback,"编译失败，输入为空，请传入代码文本和程序输入文本");
+        return;
     }
-    else
+
+    LOG_DEBUG<<"User compile data:"<<str;
+
+    Json::Value code=azh::json::toJson(str.data());
+
+    if(code["code"].empty())
     {
-        LOG_DEBUG<<"User compile code.";
+        azh::drogon::returnFalse(callback,"编译失败，输入代码文本为空");
+        return;
     }
 
     Json::Value ret;
 
-    auto str=req->getBody();
-    
-    if(!str.empty())
-    {
-        std::cout<<"Compile data:"<<str;
+    ret["output"]=compileCodeBy("compileC",code["code"].asString(),code["input"].asString());
 
-        Json::Value code=toJson(str.data());
-
-        // std::cout<<compileCodeBy("World","hello")<<"\n";
-        ret["output"]=compileCodeBy("compileC",code["code"].asString(),code["input"].asString());
-    }
-    else
-    {
-        std::cout<<"Compile data is empty\n";
-    }
-
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-
-    callback(resp);
+    azh::drogon::returnTrue(callback,"编译成功",ret);
 }
 
 void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &studentId)
@@ -120,11 +93,7 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
     if(studentId.empty())
     {
         ret["count"]=0;
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnTrue(callback,"获取成功",ret);
         return;
     }
 
@@ -151,10 +120,7 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
 
     ret["count"]=count;
     
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+    azh::drogon::returnTrue(callback,"获取成功",ret);
 }
 
 void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &experimentId)
@@ -165,16 +131,11 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
 
     auto str=req->getBody();
 
-    Json::Value code=toJson(str.data());
+    Json::Value code=azh::json::toJson(str.data());
 
     if(experimentId.empty()||str.empty())
     {
-        ret["success"] = "false";
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnFalse(callback,"提交失败，实验id为空，或提交数据为空，错误的请求");
         return;
     }
 
@@ -190,16 +151,15 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
     }
 
     if(!isFound)
-        ret["success"]="false";
-    else
     {
-        clientPtr->execSqlSync("update experiment_record set code='"+code["data"].asString()+"'"+" where id="+experimentId);
-        clientPtr->execSqlSync("update experiment_record set isfinish=1 where id="+experimentId);
-        ret["success"]="true";
+        azh::drogon::returnFalse(callback,"提交失败，所提交实验不存在或已被删除");
+        return;
     }
     
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+    clientPtr->execSqlSync("update experiment_record set code='"+code["data"].asString()+"'"+" where id="+experimentId);
+    clientPtr->execSqlSync("update experiment_record set isfinish=1 where id="+experimentId);
+    
+    // submit
+
+    azh::drogon::returnTrue(callback,"提交成功");
 }

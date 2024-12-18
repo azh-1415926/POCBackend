@@ -1,17 +1,12 @@
 #include "Class.h"
 
+#include <Base.h>
+
 void Class::getClass(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &classId)
 {
-    Json::Value ret;
-
     if(classId.empty())
     {
-        ret["success"] = "false";
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnFalse(callback,"获取失败，班级id为空");
         return;
     }
 
@@ -19,6 +14,7 @@ void Class::getClass(const HttpRequestPtr &req, std::function<void(const HttpRes
 
     const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where class_id="+classId);
 
+    Json::Value ret;
     bool isFound=false;
 
     for (auto row : result)
@@ -30,12 +26,7 @@ void Class::getClass(const HttpRequestPtr &req, std::function<void(const HttpRes
     }
 
     if(!isFound)
-        ret["success"]="false";
+        azh::drogon::returnFalse(callback,"获取失败，该班级不存在");
     else
-        ret["success"]="true";
-    
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+        azh::drogon::returnFalse(callback,"获取成功",ret);
 }

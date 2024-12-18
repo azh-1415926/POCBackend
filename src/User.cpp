@@ -10,18 +10,13 @@ void User::login(const HttpRequestPtr &req,
            std::string &&userId,
            const std::string &password)
 {
-    LOG_DEBUG<<"User "<<userId<<" try to User";
+    LOG_DEBUG<<"User "<<userId<<" try to login";
 
     Json::Value ret;
 
     if(userId.empty())
     {
-        ret["success"] = "false";
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnFalse(callback,"登陆失败，用户id为空");
         return;
     }
 
@@ -63,32 +58,26 @@ void User::login(const HttpRequestPtr &req,
 
     if(isVaild)
     {
-        ret["success"] = "true";
+        azh::drogon::returnFalse(callback,"登陆失败，用户不存在");
+        return;
+    }
 
-        if(userId=="admin")
-        {
-            auto session=req->getSession();
-            std::string token=session->get<std::string>("token");
-            std::cout << "has token:"<<token << std::endl;
-        }
-        else
-        {
-            std::cout << "no token,send token" << std::endl;
-            std::string token=drogon::utils::getUuid();
-            tokenOfAdmin::getInstance().set(token);
-            ret["token"]=token;
-        }
+    if(userId=="admin")
+    {
+        auto session=req->getSession();
+        std::string token=session->get<std::string>("token");
+        LOG_DEBUG<< "The Admin has token : "<<token;
     }
     else
     {
-        ret["success"] = "false";
-    }
-        
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
+        std::string token=drogon::utils::getUuid();
+        tokenOfAdmin::getInstance().set(token);
+        ret["token"]=token;
 
-    callback(resp);
+        LOG_DEBUG<< "The Admin has no token,send token:" <<token;
+    }
+    
+    azh::drogon::returnTrue(callback,"登陆成功");
 }
 
 void User::getInfo(const HttpRequestPtr &req,
@@ -100,33 +89,27 @@ void User::getInfo(const HttpRequestPtr &req,
 
     if(userId.empty())
     {
-        ret["success"] = "false";
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnFalse(callback,"用户id为空，无法获取信息");
         return;
     }
 
-    auto clientPtr = drogon::app().getDbClient("POC");
+    bool isFound=false;
 
+    auto clientPtr = drogon::app().getDbClient("POC");
 
     const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+userId+"'");
     for (auto row : result)
     {
-        ret["result"]="true";
+        isFound=true;
         ret["user_name"]=row["name"].as<std::string>();
         ret["role"]=row["role"].as<int>();
     }
 
-    if(!ret["result"])
+    if(!isFound)
     {
-        ret["result"]="false";
+        azh::drogon::returnFalse(callback,"获取用户失败，无该用户");
+        return;
     }
     
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+    azh::drogon::returnTrue(callback,"获取用户成功",ret);
 }

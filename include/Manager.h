@@ -13,6 +13,7 @@ class Manager : public drogon::HttpController<Manager>
     // METHOD_ADD(Manager::your_method_name, "/{1}/{2}/list", Get); // path is /Manager/{arg1}/{arg2}/list
     // ADD_METHOD_TO(Manager::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
     METHOD_ADD(Manager::isValid,"/isValid?userId={1}",Get);
+    METHOD_ADD(Manager::addUser,"/addUser",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -20,4 +21,7 @@ class Manager : public drogon::HttpController<Manager>
     // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
     void isValid(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback,const std::string& userId);
+
+    void addUser(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
 };

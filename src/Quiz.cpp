@@ -1,17 +1,14 @@
 #include "Quiz.h"
 
+#include "Base.h"
+
 void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback,const std::string& chapter)
 {
     Json::Value ret;
 
     if(chapter.empty())
     {
-        ret["success"] = "false";
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnFalse(callback,"获取失败，所选章节暂无题目");
         return;
     }
 
@@ -39,8 +36,5 @@ void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpRespo
 
     ret["count"]=count;
     
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+    azh::drogon::returnTrue(callback,"获取成功",ret);
 }

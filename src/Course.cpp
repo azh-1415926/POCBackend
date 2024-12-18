@@ -1,5 +1,7 @@
 #include "Course.h"
 
+#include "Base.h"
+
 void Course::getOutline(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     Json::Value ret;
@@ -32,26 +34,18 @@ void Course::getOutline(const HttpRequestPtr &req, std::function<void(const Http
 
     ret["count"]=countOfChapter;
     
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+    azh::drogon::returnTrue(callback,"获取成功",ret);
 }
 
 void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &chapter, const std::string &section)
 {
-    Json::Value ret;
-
     if(chapter.empty())
     {
-        ret["success"] = "false";
-        auto resp=HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(k200OK);
-        resp->addHeader("Access-Control-Allow-Origin","*");
-
-        callback(resp);
+        azh::drogon::returnFalse(callback,"获取失败，请求数据为空");
         return;
     }
+
+    Json::Value ret;
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
@@ -68,12 +62,10 @@ void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpR
     }
 
     if(!isFound)
-        ret["success"]="false";
-    else
-        ret["success"]="true";
-    
-    auto resp=HttpResponse::newHttpJsonResponse(ret);
-    resp->setStatusCode(k200OK);
-    resp->addHeader("Access-Control-Allow-Origin","*");
-    callback(resp);
+    {
+        azh::drogon::returnFalse(callback,"获取失败，无该章节");
+        return;
+    }
+
+    azh::drogon::returnTrue(callback,"获取成功");
 }
