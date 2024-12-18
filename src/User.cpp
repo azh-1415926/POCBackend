@@ -1,14 +1,16 @@
-#include "Login.h"
+#include "User.h"
 
 #include <json/json.h>
 #include <drogon/orm/Exception.h>
 
-void Login::login(const HttpRequestPtr &req,
+#include "Base.h"
+
+void User::login(const HttpRequestPtr &req,
            std::function<void (const HttpResponsePtr &)> &&callback,
            std::string &&userId,
            const std::string &password)
 {
-    LOG_DEBUG<<"User "<<userId<<" try to login";
+    LOG_DEBUG<<"User "<<userId<<" try to User";
 
     Json::Value ret;
 
@@ -24,8 +26,6 @@ void Login::login(const HttpRequestPtr &req,
     }
 
     auto json = req->getJsonObject();
-
-    auto session=req->session();
 
     bool isVaild=false;
 
@@ -65,8 +65,9 @@ void Login::login(const HttpRequestPtr &req,
     {
         ret["success"] = "true";
 
-        if(session->find("token"))
+        if(userId=="admin")
         {
+            auto session=req->getSession();
             std::string token=session->get<std::string>("token");
             std::cout << "has token:"<<token << std::endl;
         }
@@ -74,21 +75,8 @@ void Login::login(const HttpRequestPtr &req,
         {
             std::cout << "no token,send token" << std::endl;
             std::string token=drogon::utils::getUuid();
-            session->insert("token",token);
-            session->insert("userId",userId);
-
+            tokenOfAdmin::getInstance().set(token);
             ret["token"]=token;
-            // const drogon::orm::Result &resultOfToken=clientPtr->execSqlSync("select * from token where id="+userId);
-            // if(resultOfToken.size()==0)
-            // {
-            //     std::cout<<"add a token to database\n";
-            //     clientPtr->execSqlSync("insert into token values("+userId+","+token+")");
-            // }
-            // else
-            // {
-            //     std::cout<<"update a token from database\n";
-            //     clientPtr->execSqlSync("update token set value="+token+" where id="+userId);
-            // }
         }
     }
     else
@@ -102,7 +90,8 @@ void Login::login(const HttpRequestPtr &req,
 
     callback(resp);
 }
-void Login::getInfo(const HttpRequestPtr &req,
+
+void User::getInfo(const HttpRequestPtr &req,
              std::function<void (const HttpResponsePtr &)> &&callback,const std::string &userId) const
 {
     auto json = req->getJsonObject();
