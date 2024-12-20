@@ -67,5 +67,5 @@ void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpR
         return;
     }
 
-    azh::drogon::returnTrue(callback,"获取成功");
+    azh::drogon::returnTrue(callback,"获取成功",ret);
 }

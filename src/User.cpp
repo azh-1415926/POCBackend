@@ -23,6 +23,7 @@ void User::login(const HttpRequestPtr &req,
     auto json = req->getJsonObject();
 
     bool isVaild=false;
+    bool isFound=false;
 
     auto clientPtr = drogon::app().getDbClient("POC");
     // clientPtr->execSqlAsync("select * from users where id="+userId,
@@ -48,6 +49,7 @@ void User::login(const HttpRequestPtr &req,
     // std::cout << result.size() << " rows selected!" << std::endl;
     for (auto row : result)
     {
+        isFound=true;
         std::cout << "user password is " << row["password"].as<std::string>() << std::endl;
         if(row["password"].as<std::string>()==password)
         {
@@ -56,28 +58,37 @@ void User::login(const HttpRequestPtr &req,
         }    
     }
 
-    if(isVaild)
+    if(!isFound)
     {
         azh::drogon::returnFalse(callback,"登陆失败，用户不存在");
+        return;
+    }
+
+    if(!isVaild)
+    {
+        azh::drogon::returnFalse(callback,"登陆失败，密码错误");
         return;
     }
 
     if(userId=="admin")
     {
         auto session=req->getSession();
-        std::string token=session->get<std::string>("token");
-        LOG_DEBUG<< "The Admin has token : "<<token;
-    }
-    else
-    {
-        std::string token=drogon::utils::getUuid();
-        tokenOfAdmin::getInstance().set(token);
-        ret["token"]=token;
+        if(session->find("token"))
+        {
+            std::string token=session->get<std::string>("token");
+            LOG_DEBUG<< "The Admin has token : "<<token;
+        }
+        else
+        {
+            std::string token=drogon::utils::getUuid();
+            tokenOfAdmin::getInstance().set(token);
+            ret["token"]=token;
 
-        LOG_DEBUG<< "The Admin has no token,send token:" <<token;
+            LOG_DEBUG<< "The Admin has no token,send token:" <<token;
+        }
     }
     
-    azh::drogon::returnTrue(callback,"登陆成功");
+    azh::drogon::returnTrue(callback,"登陆成功",ret);
 }
 
 void User::getInfo(const HttpRequestPtr &req,
