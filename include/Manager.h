@@ -14,6 +14,11 @@ class Manager : public drogon::HttpController<Manager>
     // ADD_METHOD_TO(Manager::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
     METHOD_ADD(Manager::isValid,"/isValid?userId={1}",Get);
     METHOD_ADD(Manager::addUser,"/addUser",Post);
+    METHOD_ADD(Manager::removeUser,"/removeUser",Post);
+    METHOD_ADD(Manager::alterUser,"/alterUser",Post);
+    METHOD_ADD(Manager::addClass,"/addClass",Post);
+    METHOD_ADD(Manager::removeClass,"/removeClass",Post);
+    METHOD_ADD(Manager::alterClass,"/alterClass",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -23,5 +28,20 @@ class Manager : public drogon::HttpController<Manager>
                std::function<void (const HttpResponsePtr &)> &&callback,const std::string& userId);
 
     void addUser(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+
+    void removeUser(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+
+    void alterUser(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+
+    void addClass(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+
+    void removeClass(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+          
+    void alterClass(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
 };
