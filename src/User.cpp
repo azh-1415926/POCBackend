@@ -6,19 +6,30 @@
 #include "Base.h"
 
 void User::login(const HttpRequestPtr &req,
-           std::function<void (const HttpResponsePtr &)> &&callback,
-           std::string &&userId,
-           const std::string &password)
+           std::function<void (const HttpResponsePtr &)> &&callback)
 {
-    LOG_DEBUG<<"User "<<userId<<" try to login";
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"登陆失败，未知的请求，请带上id和密码");
+        return;
+    }
 
-    Json::Value ret;
+    Json::Value data=azh::json::toJson(str.data());
 
-    if(userId.empty())
+    if(!data.find("id"))
     {
         azh::drogon::returnFalse(callback,"登陆失败，用户id为空");
         return;
     }
+
+    std::string userId=data["id"].as<std::string>();
+    std::string password=data["password"].as<std::string>();
+
+    LOG_DEBUG<<"User "<<userId<<" try to login";
+
+    Json::Value ret;
 
     auto json = req->getJsonObject();
 
@@ -91,29 +102,42 @@ void User::login(const HttpRequestPtr &req,
     azh::drogon::returnTrue(callback,"登陆成功",ret);
 }
 
-void User::getInfo(const HttpRequestPtr &req,
-             std::function<void (const HttpResponsePtr &)> &&callback,const std::string &userId) const
+void User::info(const HttpRequestPtr &req,
+             std::function<void (const HttpResponsePtr &)> &&callback) const
 {
-    auto json = req->getJsonObject();
-
-    Json::Value ret;
-
-    if(userId.empty())
+    auto str=req->getBody();
+    
+    if(str.empty())
     {
-        azh::drogon::returnFalse(callback,"用户id为空，无法获取信息");
+        azh::drogon::returnFalse(callback,"查询失败，未知的请求，请带上id数据");
         return;
     }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(!data.find("id"))
+    {
+        azh::drogon::returnFalse(callback,"查询失败，用户id为空");
+        return;
+    }
+
+    Json::Value ret;
 
     bool isFound=false;
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+userId+"'");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+data["id"].as<std::string>()+"'");
     for (auto row : result)
     {
         isFound=true;
-        ret["user_name"]=row["name"].as<std::string>();
+        ret["name"]=row["name"].as<std::string>();
         ret["role"]=row["role"].as<int>();
+
+        if(data.find("token")&&data["token"].as<std::string>()==tokenOfAdmin::getInstance().get())
+        {
+            ret["password"]=row["password"].as<int>();
+        }
     }
 
     if(!isFound)

@@ -2,13 +2,25 @@
 
 #include <Base.h>
 
-void Class::getClass(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &classId)
+void Class::info(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
-    if(classId.empty())
+    auto str=req->getBody();
+    
+    if(str.empty())
     {
-        azh::drogon::returnFalse(callback,"获取失败，班级id为空");
+        azh::drogon::returnFalse(callback,"查询失败，未知的请求，请带上id和管理员token");
         return;
     }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(!data.find("id"))
+    {
+        azh::drogon::returnFalse(callback,"查询失败，班级id为空");
+        return;
+    }
+
+    std::string classId=data["id"].as<std::string>();
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
