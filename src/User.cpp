@@ -136,7 +136,7 @@ void User::info(const HttpRequestPtr &req,
 
         if(data.find("token")&&data["token"].as<std::string>()==tokenOfAdmin::getInstance().get())
         {
-            ret["password"]=row["password"].as<int>();
+            ret["password"]=row["password"].as<std::string>();
         }
     }
 

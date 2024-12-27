@@ -109,6 +109,24 @@ void Manager::removeUser(const HttpRequestPtr &req, std::function<void(const Htt
         return;
     }
 
+    auto clientPtr = drogon::app().getDbClient("POC");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+data["id"].as<std::string>()+"'");
+
+    bool isFound=false;
+
+    for (auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(!isFound)
+    {
+        azh::drogon::returnFalse(callback,"删除失败，该用户不存在");
+        return;
+    }
+
+    clientPtr->execSqlSync("delete from users where id='"+data["id"].as<std::string>()+"'");
+
     azh::drogon::returnTrue(callback,"删除成功");
 }
 
@@ -135,6 +153,24 @@ void Manager::alterUser(const HttpRequestPtr &req, std::function<void(const Http
         azh::drogon::returnFalse(callback,"修改失败，请输入用户id，请求格式有误");
         return;
     }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+data["id"].as<std::string>()+"'");
+
+    bool isFound=false;
+
+    for (auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(!isFound)
+    {
+        azh::drogon::returnFalse(callback,"修改失败，该用户不存在");
+        return;
+    }
+
+    clientPtr->execSqlSync("update users set name='"+data["name"].as<std::string>()+"',password='"+data["password"].as<std::string>()+"',role="+data["role"].as<std::string>()+" where id='"+data["id"].as<std::string>()+"'");
 
     azh::drogon::returnTrue(callback,"修改成功");
 }
