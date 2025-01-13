@@ -37,13 +37,32 @@ void Course::getOutline(const HttpRequestPtr &req, std::function<void(const Http
     azh::drogon::returnTrue(callback,"获取成功",ret);
 }
 
-void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &chapter, const std::string &section)
+void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
-    if(chapter.empty())
+    auto str=req->getBody();
+    
+    if(str.empty())
     {
-        azh::drogon::returnFalse(callback,"获取失败，请求数据为空");
+        azh::drogon::returnFalse(callback,"获取课程失败，请带上请求数据，比如指定章、节");
         return;
     }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(!data.find("chapter"))
+    {
+        azh::drogon::returnFalse(callback,"获取失败，章为空");
+        return;
+    }
+
+    if(!data.find("section"))
+    {
+        azh::drogon::returnFalse(callback,"获取失败，节为空");
+        return;
+    }
+
+    std::string chapter=data["chapter"].as<std::string>();
+    std::string section=data["section"].as<std::string>();
 
     Json::Value ret;
 

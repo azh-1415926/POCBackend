@@ -24,7 +24,7 @@ void Class::info(const HttpRequestPtr &req, std::function<void(const HttpRespons
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where class_id="+classId);
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where id='"+classId+"'");
 
     Json::Value ret;
     bool isFound=false;

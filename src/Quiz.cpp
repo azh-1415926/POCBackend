@@ -2,16 +2,27 @@
 
 #include "Base.h"
 
-void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback,const std::string& chapter)
+void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
-    Json::Value ret;
-
-    if(chapter.empty())
+    auto str=req->getBody();
+    
+    if(str.empty())
     {
-        azh::drogon::returnFalse(callback,"获取失败，所选章节暂无题目");
+        azh::drogon::returnFalse(callback,"获取失败，未知的请求");
         return;
     }
 
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(data.find("chapter"))
+    {
+        azh::drogon::returnFalse(callback,"请填写章节，获取指定章节的题目");
+        return;
+    }
+
+    std::string chapter=data["chapter"].as<std::string>();
+
+    Json::Value ret;
     auto clientPtr = drogon::app().getDbClient("POC");
 
     const drogon::orm::Result &result=clientPtr->execSqlSync("select * from quiz where chapter="+chapter);

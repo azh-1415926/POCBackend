@@ -86,17 +86,28 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
     azh::drogon::returnTrue(callback,"编译成功",ret);
 }
 
-void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &studentId)
+void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     Json::Value ret;
+    ret["count"]=0;
 
-    if(studentId.empty())
+    auto str=req->getBody();
+    
+    if(str.empty())
     {
-        ret["count"]=0;
-        azh::drogon::returnTrue(callback,"获取成功",ret);
+        azh::drogon::returnFalse(callback,"获取失败，未知的请求",ret);
         return;
     }
 
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(data.find("studentId"))
+    {
+        azh::drogon::returnFalse(callback,"请带上学生id，以请求实验数据",ret);
+        return;
+    }
+
+    std::string studentId=data["studentId"].as<std::string>();
     auto clientPtr = drogon::app().getDbClient("POC");
 
     const drogon::orm::Result &result=clientPtr->execSqlSync("select * from experiment_record where student_id='"+studentId+"'");
@@ -123,15 +134,27 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
     azh::drogon::returnTrue(callback,"获取成功",ret);
 }
 
-void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &experimentId)
+void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
-    auto json=req->getJsonObject();
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"未带上任何数据，无法提交实验");
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(data.find("experimentId"))
+    {
+        azh::drogon::returnFalse(callback,"请带上实验id，以提交实验数据");
+        return;
+    }
+
+    std::string experimentId=data["experimentId"].as<std::string>();
 
     Json::Value ret;
-
-    auto str=req->getBody();
-
-    Json::Value code=azh::json::toJson(str.data());
 
     if(experimentId.empty()||str.empty())
     {
@@ -156,7 +179,7 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
         return;
     }
     
-    clientPtr->execSqlSync("update experiment_record set code='"+code["data"].asString()+"'"+" where id="+experimentId);
+    clientPtr->execSqlSync("update experiment_record set code='"+data["code"].asString()+"'"+" where id="+experimentId);
     clientPtr->execSqlSync("update experiment_record set isfinish=1 where id="+experimentId);
     
     // submit
