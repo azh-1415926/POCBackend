@@ -101,7 +101,7 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
 
     Json::Value data=azh::json::toJson(str.data());
 
-    if(data.find("studentId"))
+    if(!data.find("studentId"))
     {
         azh::drogon::returnFalse(callback,"请带上学生id，以请求实验数据",ret);
         return;
@@ -146,7 +146,7 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
 
     Json::Value data=azh::json::toJson(str.data());
 
-    if(data.find("experimentId"))
+    if(!data.find("experimentId"))
     {
         azh::drogon::returnFalse(callback,"请带上实验id，以提交实验数据");
         return;
@@ -155,12 +155,6 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
     std::string experimentId=data["experimentId"].as<std::string>();
 
     Json::Value ret;
-
-    if(experimentId.empty()||str.empty())
-    {
-        azh::drogon::returnFalse(callback,"提交失败，实验id为空，或提交数据为空，错误的请求");
-        return;
-    }
 
     auto clientPtr = drogon::app().getDbClient("POC");
 

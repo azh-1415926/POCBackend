@@ -14,7 +14,7 @@ void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpRespo
 
     Json::Value data=azh::json::toJson(str.data());
 
-    if(data.find("chapter"))
+    if(!data.find("chapter"))
     {
         azh::drogon::returnFalse(callback,"请填写章节，获取指定章节的题目");
         return;
