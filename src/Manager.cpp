@@ -199,6 +199,30 @@ void Manager::addClass(const HttpRequestPtr &req, std::function<void(const HttpR
         return;
     }
 
+    if(!data.find("teacher_id"))
+    {
+        azh::drogon::returnFalse(callback,"添加失败，请输入任课教师id，请求格式有误");
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where id='"+data["id"].as<std::string>()+"'");
+
+    bool isFound=false;
+
+    for (auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(isFound)
+    {
+        azh::drogon::returnFalse(callback,"添加失败，该班级已存在");
+        return;
+    }
+
+    clientPtr->execSqlSync("insert into class values('"+data["id"].as<std::string>()+"','"+data["name"].as<std::string>()+"','"+data["teacher_id"].as<std::string>()+"');");
+
     azh::drogon::returnTrue(callback,"添加成功");
 }
 
@@ -225,6 +249,24 @@ void Manager::removeClass(const HttpRequestPtr &req, std::function<void(const Ht
         azh::drogon::returnFalse(callback,"删除失败，请输入班级id，请求格式有误");
         return;
     }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where id='"+data["id"].as<std::string>()+"'");
+
+    bool isFound=false;
+
+    for (auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(!isFound)
+    {
+        azh::drogon::returnFalse(callback,"删除失败，该班级不存在");
+        return;
+    }
+
+    clientPtr->execSqlSync("delete from class where id='"+data["id"].as<std::string>()+"'");
 
     azh::drogon::returnTrue(callback,"删除成功");
 }
@@ -253,5 +295,71 @@ void Manager::alterClass(const HttpRequestPtr &req, std::function<void(const Htt
         return;
     }
 
+    if(!data.find("teacher_id"))
+    {
+        azh::drogon::returnFalse(callback,"修改失败，请输入任课教师id，请求格式有误");
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where id='"+data["id"].as<std::string>()+"'");
+
+    bool isFound=false;
+
+    for (auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(!isFound)
+    {
+        azh::drogon::returnFalse(callback,"修改失败，该班级不存在");
+        return;
+    }
+
+    clientPtr->execSqlSync("update class set name='"+data["name"].as<std::string>()+"',teacher_id='"+data["teacher_id"].as<std::string>()+"' where id='"+data["id"].as<std::string>()+"'");
+
     azh::drogon::returnTrue(callback,"修改成功");
+}
+
+void Manager::getUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上管理员token和数据");
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    azh::drogon::returnTrue(callback,"获取成功");
+}
+
+void Manager::getClass(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上管理员token和数据");
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    azh::drogon::returnTrue(callback,"获取成功");
 }
