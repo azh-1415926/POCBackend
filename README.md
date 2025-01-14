@@ -48,7 +48,21 @@
     * Url : `/Class/info`
     * Method : Post
     * RequiredData : id(string)
-    * Response : 正确返回 name(string)、teacher_id(string)
+        ```json
+        {
+            "id": "21091040",
+            "token": "afe2a8de-02c8-41ea-b2e7-ae3820e32311"
+        }
+        ```
+    * Response : 正确返回 name(string)、teacherId(string)
+        ```json
+        {
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "name": "21\u8f6f\u4ef62\u73ed",
+            "result": "true",
+            "teacherId": "20250114"
+        }
+        ```
 
 **课程模块**
 1. 获取大纲数据
@@ -264,37 +278,54 @@
     * RequiredData : id(string)、name(string)teacher(string)、token(string)
         ```json
         {
-            "id": "2109104047",
-            "name": "azh",
-            "teacherId": "0",
-            "token": "f48637f8-4c9d-484a-9bbc-32fe59a252e7"
+            "id": "21091040",
+            "name": "21软件2班",
+            "teacherId": "20250114",
+            "token": "f93decef-71fa-4c55-a651-93b634928271"
         }
         ```
     * Response : 返回数据，如下所示:
         ```json
-        // 暂无
+        {
+            "info":"\u6dfb\u52a0\u6210\u529f",
+            "result":"true"
+        }
         ```
 6. 删除班级
     * Url : `/Manager/removeClass`
     * Method : Post
     * RequiredData : 暂无
         ```json
-        // 暂无
+        {
+            "id": "21091040",
+            "token": "afe2a8de-02c8-41ea-b2e7-ae3820e32311"
+        }
         ```
     * Response : 返回数据，如下所示:
         ```json
-        // 暂无
+        {
+            "info":"\u5220\u9664\u6210\u529f",
+            "result":"true"
+        }
         ```
 7. 修改班级
     * Url : `/Manager/alterClass`
     * Method : Post
     * RequiredData : 暂无
         ```json
-        // 暂无
+        {
+            "id": "21091040",
+            "name": "21软件2班",
+            "teacherId": "20250114",
+            "token": "afe2a8de-02c8-41ea-b2e7-ae3820e32311"
+        }
         ```
     * Response : 返回数据，如下所示:
         ```json
-        // 暂无
+        {
+            "info": "\u4fee\u6539\u5931\u8d25\uff0c\u8bf7\u8f93\u5165\u4efb\u8bfe\u6559\u5e08id\uff0c\u8bf7\u6c42\u683c\u5f0f\u6709\u8bef",
+            "result": "false"
+        }
         ```
 8. 获取用户详细信息
     * Url : `/Manager/getUser`

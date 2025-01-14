@@ -32,7 +32,7 @@ void Class::info(const HttpRequestPtr &req, std::function<void(const HttpRespons
     for (auto row : result)
     {
         ret["name"]=row["name"].as<std::string>();
-        ret["teacher_id"]=row["teacher_id"].as<std::string>();
+        ret["teacherId"]=row["teacher_id"].as<std::string>();
 
         isFound=true;
     }
@@ -40,5 +40,5 @@ void Class::info(const HttpRequestPtr &req, std::function<void(const HttpRespons
     if(!isFound)
         azh::drogon::returnFalse(callback,"获取失败，该班级不存在");
     else
-        azh::drogon::returnFalse(callback,"获取成功",ret);
+        azh::drogon::returnTrue(callback,"获取成功",ret);
 }

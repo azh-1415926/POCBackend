@@ -221,7 +221,7 @@ void Manager::addClass(const HttpRequestPtr &req, std::function<void(const HttpR
         return;
     }
 
-    clientPtr->execSqlSync("insert into class values('"+data["id"].as<std::string>()+"','"+data["name"].as<std::string>()+"','"+data["teacher_id"].as<std::string>()+"');");
+    clientPtr->execSqlSync("insert into class values('"+data["id"].as<std::string>()+"','"+data["name"].as<std::string>()+"','"+data["teacherId"].as<std::string>()+"');");
 
     azh::drogon::returnTrue(callback,"添加成功");
 }
