@@ -2,7 +2,7 @@
 
 #include "Base.h"
 
-void Quiz::getquiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+void Quiz::getQuiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     auto str=req->getBody();
     

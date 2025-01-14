@@ -199,7 +199,7 @@ void Manager::addClass(const HttpRequestPtr &req, std::function<void(const HttpR
         return;
     }
 
-    if(!data.find("teacher_id"))
+    if(!data.find("teacherId"))
     {
         azh::drogon::returnFalse(callback,"添加失败，请输入任课教师id，请求格式有误");
         return;
