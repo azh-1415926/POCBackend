@@ -14,6 +14,7 @@ class Course : public drogon::HttpController<Course>
     // ADD_METHOD_TO(Course::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
     METHOD_ADD(Course::getOutline,"/getOutline",Post);
     METHOD_ADD(Course::getCourse,"/getCourse",Post);
+    METHOD_ADD(Course::updateCourse,"/update",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -22,5 +23,7 @@ class Course : public drogon::HttpController<Course>
     void getOutline(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
     void getCourse(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+    void updateCourse(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
 };
