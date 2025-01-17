@@ -120,7 +120,7 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
         
         experiment["id"]=result.at(i)["id"].as<int>();
         experiment["student_id"]=result.at(i)["student_id"].as<std::string>();
-        experiment["teacher_id"]=result.at(i)["teacher_id"].as<std::string>();
+        experiment["teacherId"]=result.at(i)["teacher_id"].as<std::string>();
         experiment["name"]=result.at(i)["name"].as<std::string>();
         experiment["content"]=result.at(i)["content"].as<std::string>();
         experiment["isfinish"]=result.at(i)["isfinish"].as<int>();
