@@ -61,10 +61,10 @@ void User::login(const HttpRequestPtr &req,
     for (auto row : result)
     {
         isFound=true;
-        std::cout << "user password is " << row["password"].as<std::string>() << std::endl;
+        LOG_DEBUG << "User gived password is " << password;
+        LOG_DEBUG << "User password is " << row["password"].as<std::string>();
         if(row["password"].as<std::string>()==password)
         {
-            LOG_DEBUG<<"User "<<userId<<" passwd:"<<password;
             isVaild=true;
         }    
     }
@@ -147,4 +147,46 @@ void User::info(const HttpRequestPtr &req,
     }
     
     azh::drogon::returnTrue(callback,"获取用户成功",ret);
+}
+
+void User::getUnallocatedStudent(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) const
+{
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上管理员token");
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    Json::Value ret;
+
+    int count=0;
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select id from users where role=0 and id not in (select id from student);");
+    for (auto row : result)
+    {
+        ret[std::to_string(count)]=row["id"].as<std::string>();
+        count++;
+    }
+
+    ret["count"]=count;
+
+    if(count==0)
+    {
+        azh::drogon::returnTrue(callback,"获取成功，无任何未分配的用户",ret);
+        return;
+    }
+    
+    azh::drogon::returnTrue(callback,"获取成功",ret);
 }

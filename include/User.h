@@ -11,6 +11,8 @@ class User : public drogon::HttpController<User>
     // use METHOD_ADD to add your custom processing function here;
     METHOD_ADD(User::login,"/login",Post);
     METHOD_ADD(User::info,"/info",Post);
+    METHOD_ADD(User::getUnallocatedStudent,"/getUnallocatedStudent",Post);
+
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
 
@@ -18,5 +20,8 @@ class User : public drogon::HttpController<User>
                std::function<void (const HttpResponsePtr &)> &&callback);
 
     void info(const HttpRequestPtr &req,
+                 std::function<void (const HttpResponsePtr &)> &&callback) const;
+
+    void getUnallocatedStudent(const HttpRequestPtr &req,
                  std::function<void (const HttpResponsePtr &)> &&callback) const;
 };

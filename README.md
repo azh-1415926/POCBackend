@@ -42,6 +42,25 @@
             "role": 0
         }
         ```
+3. 获取未分配班级的用户
+    * Url : `/User/getUnallocatedStudent`
+    * Method : Post
+    * RequiredData : none
+        ```json
+        {
+            "token": "07d80879-010c-4793-aa8c-9305f5ac248d"
+        }
+        ```
+    * Response : 返回全部未分配班级的用户id
+        ```json
+        {
+            "0":"2109104047",
+            "count":1,
+            "info":"\u83b7\u53d6\u6210\u529f",
+            "result":"true"
+        }
+        ```
+
 
 **班级模块**
 1. 班级信息
@@ -63,6 +82,25 @@
             "teacherId": "20250114"
         }
         ```
+2. 班级分配
+* Url : `/Class/allocate`
+    * Method : Post
+    * RequiredData : id(string),userId(string)
+        ```json
+        {
+            "id": "21091040",
+            "token": "07d80879-010c-4793-aa8c-9305f5ac248d",
+            "userId": "2109104047"
+        }
+        ```
+    * Response : 正确返回
+        ```json
+        {
+            "info": "\u5206\u914d\u5931\u8d25\uff0c\u8be5\u7528\u6237\u5df2\u5206\u914d\u8fc7\u73ed\u7ea7",
+            "result": "false"
+        }
+        ```
+    
 
 **课程模块**
 1. 获取大纲数据
