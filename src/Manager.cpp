@@ -117,6 +117,12 @@ void Manager::removeUser(const HttpRequestPtr &req, std::function<void(const Htt
     for (auto row : result)
     {
         isFound=true;
+
+        if(row["name"].as<std::string>()=="admin")
+        {
+            azh::drogon::returnFalse(callback,"删除失败，无法删除管理员");
+            return;
+        }
     }
 
     if(!isFound)
@@ -162,6 +168,12 @@ void Manager::alterUser(const HttpRequestPtr &req, std::function<void(const Http
     for (auto row : result)
     {
         isFound=true;
+
+        if(row["name"].as<std::string>()=="admin")
+        {
+            azh::drogon::returnFalse(callback,"修改失败，无法修改管理员");
+            return;
+        }
     }
 
     if(!isFound)
@@ -346,11 +358,12 @@ void Manager::getUser(const HttpRequestPtr &req, std::function<void(const HttpRe
         "FROM users u "
         "LEFT JOIN student s ON u.id = s.id "
         "LEFT JOIN class c_student ON s.class_id = c_student.id "
+        "WHERE u.role = 0 "
         // "WHERE s.id IS NOT NULL "
         "UNION "
-        "SELECT u.id,u.name,'教师' AS user_role,c_teacher.name AS class_name,u.last_login_time "
+        "SELECT u.id,u.name,'教师' AS user_role,'' AS class_name,u.last_login_time "
         "FROM users u "
-        "LEFT JOIN class c_teacher ON u.id = c_teacher.teacher_id "
+        //"LEFT JOIN class c_teacher ON u.id = c_teacher.teacher_id "
         "WHERE u.role = 1;";
 
     const drogon::orm::Result &result=clientPtr->execSqlSync(query);

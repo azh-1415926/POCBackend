@@ -131,6 +131,7 @@ void User::info(const HttpRequestPtr &req,
     for (auto row : result)
     {
         isFound=true;
+        
         ret["name"]=row["name"].as<std::string>();
         ret["role"]=row["role"].as<int>();
 
