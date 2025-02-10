@@ -126,3 +126,47 @@ void Class::allocate(const HttpRequestPtr &req, std::function<void(const HttpRes
 
     azh::drogon::returnTrue(callback,"分配成功");
 }
+
+void Class::getClassByTeacher(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上教师id");
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(!data.find("id"))
+    {
+        azh::drogon::returnFalse(callback,"获取失败，请输入教师id，请求格式有误");
+        return;
+    }
+
+    Json::Value ret;
+
+    std::string teacherId=data["id"].as<std::string>();
+    int count=0;
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    const drogon::orm::Result &resultOfClass=clientPtr->execSqlSync("select * from class where teacher_id='"+teacherId+"'");
+
+    bool isFound=false;
+
+    for(auto row : resultOfClass)
+    {
+        Json::Value info;
+        
+        info["id"]=row["id"].as<std::string>();
+        info["name"]=row["name"].as<std::string>();
+
+        ret[std::to_string(count)]=info;
+        count++;
+    }
+
+    ret["count"]=count;
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}

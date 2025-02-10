@@ -100,7 +100,27 @@
             "result": "false"
         }
         ```
-    
+3. 获取教师管理的班级
+* Url : `/Class/getClassByTeacher`
+    * Method : Post
+    * RequiredData : id(string),userId(string)
+        ```json
+        {
+            "id": "20250115"
+        }
+        ```
+    * Response : 正确返回
+        ```json
+        {
+            "0": {
+                "id": "21091040",
+                "name": "21\u8f6f\u4ef62\u73ed"
+            },
+            "count": 1,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true"
+        }
+        ```
 
 **课程模块**
 1. 获取大纲数据
@@ -178,7 +198,48 @@
             "result":"true"
         }
         ```
-2. 获取实验
+2. 发布实验
+    * Url : `/Code/releaseExperiment`
+    * Method : Post
+    * RequiredData : studentId(string)
+        ```json
+        {
+            "classId": "21091040",
+            "content": "语法分析",
+            "name": "第二章 语法分析"
+        }
+        ```
+    * Response : 返回 name(string)、content(string)，如下所示:
+        ```json
+        {
+            "info":"\u6dfb\u52a0\u6210\u529f",
+            "result":"true"
+        }
+        ```
+3. 获取未完成的实验列表
+    * Url : `/Code/getUnfinishedExperiment`
+    * Method : Post
+    * RequiredData : studentId(string)
+        ```json
+        {
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 返回 name(string)、content(string)，如下所示:
+        ```json
+        {
+            "0": {
+                "content": "\u7f16\u5199\u4e00\u6bb5\u7a0b\u5e8f\uff0c\u8fd0\u884c\u67e5\u770b\u7ed3\u679c",
+                "createTime": "2025-02-10 19:20:09",
+                "experimentId": "1",
+                "name": "\u7b2c\u4e00\u7ae0-\u719f\u6089 C \u7f16\u8bd1\u73af\u5883"
+            },
+            "count": 1,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true"
+        }
+        ```
+4. 获取已完成实验的记录
     * Url : `/Code/getExperiment`
     * Method : Post
     * RequiredData : studentId(string)

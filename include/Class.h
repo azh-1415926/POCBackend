@@ -14,6 +14,7 @@ class Class : public drogon::HttpController<Class>
     // ADD_METHOD_TO(Class::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
     METHOD_ADD(Class::info,"/info",Post);
     METHOD_ADD(Class::allocate,"/allocate",Post);
+    METHOD_ADD(Class::getClassByTeacher,"/getClassByTeacher",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -24,4 +25,7 @@ class Class : public drogon::HttpController<Class>
 
     void allocate(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
+    
+    void getClassByTeacher(const HttpRequestPtr &req,
+                std::function<void (const HttpResponsePtr &)> &&callback);
 };

@@ -86,6 +86,105 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
     azh::drogon::returnTrue(callback,"编译成功",ret);
 }
 
+
+void Code::releaseExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnFalse(callback,"未带上任何数据，无法添加实验");
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(!data.find("classId"))
+    {
+        azh::drogon::returnFalse(callback,"请带上班级id，以提交实验数据");
+        return;
+    }
+
+    std::string classId=data["classId"].as<std::string>();
+
+    Json::Value ret;
+    bool isFound=false;
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    auto result=clientPtr->execSqlSync("select * from class where id='"+classId+"'");
+
+    for(auto row : result)
+    {
+        isFound=true;
+    }
+
+    if(!isFound)
+    {
+        azh::drogon::returnFalse(callback,"提交失败，班级不存在");
+        return;
+    }
+    
+    clientPtr->execSqlSync("insert into experiment values(NULL,'"+classId+"','"+data["name"].as<std::string>()+"','"+data["content"].as<std::string>()+"',NOW())");
+
+    azh::drogon::returnTrue(callback,"添加成功");
+}
+
+void Code::getUnfinishedExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    Json::Value ret;
+    ret["count"]=0;
+
+    auto str=req->getBody();
+    
+    if(str.empty())
+    {
+        azh::drogon::returnTrue(callback,"获取失败，未知的请求",ret);
+        return;
+    }
+
+    Json::Value data=azh::json::toJson(str.data());
+
+    if(!data.find("studentId"))
+    {
+        azh::drogon::returnTrue(callback,"请带上学生id，以请求实验数据",ret);
+        return;
+    }
+
+    std::string studentId=data["studentId"].as<std::string>();
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    std::string query="SELECT e.* "
+        "FROM experiment e "
+        "LEFT JOIN experiment_record er ON e.id = er.experiment_id "
+        "LEFT JOIN student s ON e.class_id = s.class_id AND er.student_id = s.id AND er.student_id = '"+studentId+"' "
+        "WHERE er.id IS NULL;";
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
+
+    int count=result.size();
+
+    for (int i=0;i<count;i++)
+    {
+        Json::Value experiment;
+
+        const std::string& experimentId=result.at(i)["id"].as<std::string>();
+
+        const drogon::orm::Result &resultOfInfo=clientPtr->execSqlSync("select * from experiment where id='"+experimentId+"'");
+        
+        experiment["experimentId"]=experimentId;
+        experiment["name"]=resultOfInfo.at(0)["name"].as<std::string>();
+        experiment["content"]=resultOfInfo.at(0)["content"].as<std::string>();
+        experiment["createTime"]=resultOfInfo.at(0)["create_time"].as<std::string>();
+
+        ret[std::to_string(i)]=experiment;
+    }
+
+    ret["count"]=count;
+
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
+
 void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     Json::Value ret;
@@ -117,14 +216,19 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
     for (int i=0;i<count;i++)
     {
         Json::Value experiment;
+
+        const std::string& experimentId=result.at(i)["experiment_id"].as<std::string>();
+
+        const drogon::orm::Result &resultOfInfo=clientPtr->execSqlSync("select * from experiment where id='"+experimentId+"'");
         
         experiment["id"]=result.at(i)["id"].as<int>();
-        experiment["student_id"]=result.at(i)["student_id"].as<std::string>();
-        experiment["teacherId"]=result.at(i)["teacher_id"].as<std::string>();
-        experiment["name"]=result.at(i)["name"].as<std::string>();
-        experiment["content"]=result.at(i)["content"].as<std::string>();
-        experiment["isfinish"]=result.at(i)["isfinish"].as<int>();
+        experiment["studentId"]=result.at(i)["student_id"].as<std::string>();
+        experiment["experimentId"]=experimentId;
+        experiment["name"]=resultOfInfo.at(0)["name"].as<std::string>();
+        experiment["content"]=resultOfInfo.at(0)["content"].as<std::string>();
         experiment["code"]=result.at(i)["code"].as<std::string>();
+        experiment["createTime"]=resultOfInfo.at(0)["create_time"].as<std::string>();
+        experiment["finishTime"]=result.at(i)["finish_time"].as<std::string>();
 
         ret[std::to_string(i)]=experiment;
     }
@@ -146,19 +250,32 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
 
     Json::Value data=azh::json::toJson(str.data());
 
+    if(!data.find("studentId"))
+    {
+        azh::drogon::returnFalse(callback,"请带上学生id，以提交实验数据");
+        return;
+    }
+
     if(!data.find("experimentId"))
     {
         azh::drogon::returnFalse(callback,"请带上实验id，以提交实验数据");
         return;
     }
 
+    if(!data.find("code"))
+    {
+        azh::drogon::returnFalse(callback,"请带上代码，以提交实验数据");
+        return;
+    }
+
+    std::string studentId=data["studentId"].as<std::string>();
     std::string experimentId=data["experimentId"].as<std::string>();
 
     Json::Value ret;
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    auto result=clientPtr->execSqlSync("select * from experiment_record where id="+experimentId);
+    auto result=clientPtr->execSqlSync("select * from experiment where id="+experimentId);
 
     bool isFound=false;
 
@@ -172,10 +289,8 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
         azh::drogon::returnFalse(callback,"提交失败，所提交实验不存在或已被删除");
         return;
     }
-    
-    clientPtr->execSqlSync("update experiment_record set code='"+data["code"].asString()+"'"+" where id="+experimentId);
-    clientPtr->execSqlSync("update experiment_record set isfinish=1 where id="+experimentId);
-    
+
+    clientPtr->execSqlSync("insert into experiment_record values(NULL,'"+studentId+"','"+experimentId+"','"+data["code"].as<std::string>()+"',NOW())");
     // submit
 
     azh::drogon::returnTrue(callback,"提交成功");
