@@ -275,9 +275,24 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    auto result=clientPtr->execSqlSync("select * from experiment where id="+experimentId);
+    auto resultOfRecord=clientPtr->execSqlSync("select * from experiment_record where experiment_id="+experimentId+" and student_id='"+studentId+"'");
 
     bool isFound=false;
+
+    for(auto row : resultOfRecord)
+    {
+        isFound=true;
+    }
+
+    if(isFound)
+    {
+        azh::drogon::returnFalse(callback,"提交失败，所提交实验已存在实验记录");
+        return;
+    }
+
+    isFound=false;
+
+    auto result=clientPtr->execSqlSync("select * from experiment where id="+experimentId);
 
     for (auto row : result)
     {
