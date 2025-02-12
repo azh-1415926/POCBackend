@@ -36,35 +36,15 @@ void Manager::addUser(const HttpRequestPtr &req, std::function<void(const HttpRe
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"添加失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","id","name","password" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
         azh::drogon::returnFalse(callback,"添加失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"添加失败，请输入用户id，请求格式有误");
-        return;
-    }
-
-    if(!data.find("name"))
-    {
-        azh::drogon::returnFalse(callback,"添加失败，请输入用户姓名，请求格式有误");
-        return;
-    }
-
-    if(!data.find("password"))
-    {
-        azh::drogon::returnFalse(callback,"添加失败，请输入用户密码，请求格式有误");
         return;
     }
 
@@ -89,23 +69,15 @@ void Manager::removeUser(const HttpRequestPtr &req, std::function<void(const Htt
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"删除失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
-        azh::drogon::returnFalse(callback,"删除失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"删除失败，请输入用户id，请求格式有误");
+        azh::drogon::returnFalse(callback,"管理员token无效，请重新登陆");
         return;
     }
 
@@ -140,23 +112,15 @@ void Manager::alterUser(const HttpRequestPtr &req, std::function<void(const Http
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"修改失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
-        azh::drogon::returnFalse(callback,"修改失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"修改失败，请输入用户id，请求格式有误");
+        azh::drogon::returnFalse(callback,"管理员token无效，请重新登陆");
         return;
     }
 
@@ -191,29 +155,15 @@ void Manager::addClass(const HttpRequestPtr &req, std::function<void(const HttpR
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"添加失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","id","teacherId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
-        azh::drogon::returnFalse(callback,"添加失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"添加失败，请输入班级id，请求格式有误");
-        return;
-    }
-
-    if(!data.find("teacherId"))
-    {
-        azh::drogon::returnFalse(callback,"添加失败，请输入任课教师id，请求格式有误");
+        azh::drogon::returnFalse(callback,"管理员token无效，请重新登陆");
         return;
     }
 
@@ -242,23 +192,15 @@ void Manager::removeClass(const HttpRequestPtr &req, std::function<void(const Ht
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"删除失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
         azh::drogon::returnFalse(callback,"删除失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"删除失败，请输入班级id，请求格式有误");
         return;
     }
 
@@ -287,29 +229,15 @@ void Manager::alterClass(const HttpRequestPtr &req, std::function<void(const Htt
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"修改失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","id","teacherId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
         azh::drogon::returnFalse(callback,"修改失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"修改失败，请输入班级id，请求格式有误");
-        return;
-    }
-
-    if(!data.find("teacherId"))
-    {
-        azh::drogon::returnFalse(callback,"修改失败，请输入任课教师id，请求格式有误");
         return;
     }
 
@@ -338,17 +266,15 @@ void Manager::getUser(const HttpRequestPtr &req, std::function<void(const HttpRe
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
-        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        azh::drogon::returnFalse(callback,"管理员token无效，请重新登陆");
         return;
     }
 
@@ -405,13 +331,11 @@ void Manager::getClass(const HttpRequestPtr &req, std::function<void(const HttpR
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {

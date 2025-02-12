@@ -6,25 +6,11 @@ void Quiz::getQuiz(const HttpRequestPtr &req, std::function<void(const HttpRespo
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求");
+    Json::Value data;
+    std::vector<std::string> params={ "chapter","studentId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("chapter"))
-    {
-        azh::drogon::returnFalse(callback,"请填写章节，获取指定章节的题目");
-        return;
-    }
-
-    if(!data.find("studentId"))
-    {
-        azh::drogon::returnFalse(callback,"请输入学生id，获取指定章节的题目");
-        return;
-    }
 
     std::string chapter=data["chapter"].as<std::string>();
     std::string studentId=data["studentId"].as<std::string>();
@@ -75,25 +61,11 @@ void Quiz::getCollectedQuiz(const HttpRequestPtr &req, std::function<void(const 
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求");
+    Json::Value data;
+    std::vector<std::string> params={ "chapter","studentId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("chapter"))
-    {
-        azh::drogon::returnFalse(callback,"请填写章节，获取指定章节的题目");
-        return;
-    }
-
-    if(!data.find("studentId"))
-    {
-        azh::drogon::returnFalse(callback,"请输入学生id，获取指定章节的题目");
-        return;
-    }
 
     std::string chapter=data["chapter"].as<std::string>();
     std::string studentId=data["studentId"].as<std::string>();

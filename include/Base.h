@@ -67,5 +67,27 @@ namespace azh
             resp->addHeader("Access-Control-Allow-Origin","*");
             callback(resp);
         }
+
+        inline bool checkParams(const std::string& str,const std::vector<std::string>& params,Json::Value& data,std::function<void(const HttpResponsePtr &)> &callback,const Json::Value& ret=Json::Value())
+        {
+            if(str.empty())
+            {
+                azh::drogon::returnFalse(callback,"未知的请求，请求格式有误");
+                return false;
+            }
+
+            data=azh::json::toJson(str.data());
+
+            for(const auto& str : params)
+            {
+                if(!data.find(str))
+                {
+                    azh::drogon::returnFalse(callback,"请求失败，请求参数'"+str+"'缺失");
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

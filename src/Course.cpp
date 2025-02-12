@@ -41,25 +41,11 @@ void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpR
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取课程失败，请带上请求数据，比如指定章、节");
+    Json::Value data;
+    std::vector<std::string> params={ "chapter","section" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("chapter"))
-    {
-        azh::drogon::returnFalse(callback,"获取失败，章为空");
-        return;
-    }
-
-    if(!data.find("section"))
-    {
-        azh::drogon::returnFalse(callback,"获取失败，节为空");
-        return;
-    }
 
     std::string chapter=data["chapter"].as<std::string>();
     std::string section=data["section"].as<std::string>();
@@ -93,35 +79,15 @@ void Course::updateCourse(const HttpRequestPtr &req, std::function<void(const Ht
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"更新失败，未知的请求，请带上管理员token和数据");
+    Json::Value data;
+    std::vector<std::string> params={ "token","chapter","section","content" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
         azh::drogon::returnFalse(callback,"更新失败，管理员token无效，请重新登陆");
-        return;
-    }
-
-    if(!data.find("chapter"))
-    {
-        azh::drogon::returnFalse(callback,"更新失败，章为空");
-        return;
-    }
-
-    if(!data.find("section"))
-    {
-        azh::drogon::returnFalse(callback,"更新失败，节为空");
-        return;
-    }
-
-    if(!data.find("content"))
-    {
-        azh::drogon::returnFalse(callback,"更新失败，更新内容为空");
         return;
     }
 

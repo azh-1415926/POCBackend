@@ -10,19 +10,11 @@ void User::login(const HttpRequestPtr &req,
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"登陆失败，未知的请求，请带上id和密码");
+    Json::Value data;
+    std::vector<std::string> params={ "id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"登陆失败，用户id为空");
-        return;
-    }
 
     std::string userId=data["id"].as<std::string>();
     std::string password=data["password"].as<std::string>();
@@ -107,19 +99,11 @@ void User::info(const HttpRequestPtr &req,
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"查询失败，未知的请求，请带上id数据");
+    Json::Value data;
+    std::vector<std::string> params={ "id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"查询失败，用户id为空");
-        return;
-    }
 
     Json::Value ret;
 
@@ -154,17 +138,15 @@ void User::getUnallocatedStudent(const HttpRequestPtr &req, std::function<void(c
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上管理员token");
+    Json::Value data;
+    std::vector<std::string> params={ "token" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
 
     if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
     {
-        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        azh::drogon::returnFalse(callback,"管理员token无效，请重新登陆");
         return;
     }
 

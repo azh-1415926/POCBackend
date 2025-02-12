@@ -6,19 +6,11 @@ void Class::info(const HttpRequestPtr &req, std::function<void(const HttpRespons
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"查询失败，未知的请求，请带上id和管理员token");
+    Json::Value data;
+    std::vector<std::string> params={ "id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"查询失败，班级id为空");
-        return;
-    }
 
     std::string classId=data["id"].as<std::string>();
 
@@ -47,25 +39,11 @@ void Class::allocate(const HttpRequestPtr &req, std::function<void(const HttpRes
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"分配失败，未知的请求，请带上id和管理员token");
+    Json::Value data;
+    std::vector<std::string> params={ "id","userId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"分配失败，请输入班级id，请求格式有误");
-        return;
-    }
-
-    if(!data.find("userId"))
-    {
-        azh::drogon::returnFalse(callback,"分配失败，请输入用户id，请求格式有误");
-        return;
-    }
 
     std::string classId=data["id"].as<std::string>();
     std::string teacherId;
@@ -131,19 +109,11 @@ void Class::getClassByTeacher(const HttpRequestPtr &req, std::function<void(cons
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求，请带上教师id");
+    Json::Value data;
+    std::vector<std::string> params={ "id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("id"))
-    {
-        azh::drogon::returnFalse(callback,"获取失败，请输入教师id，请求格式有误");
-        return;
-    }
 
     Json::Value ret;
 

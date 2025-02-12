@@ -63,21 +63,15 @@ void Code::compile(const HttpRequestPtr & req, std::function<void(const HttpResp
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"编译失败，输入为空，请传入代码文本和程序输入文本");
+    Json::Value data;
+    std::vector<std::string> params={ "code" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
 
     LOG_DEBUG<<"User compile data:"<<str;
 
     Json::Value code=azh::json::toJson(str.data());
-
-    if(code["code"].empty())
-    {
-        azh::drogon::returnFalse(callback,"编译失败，输入代码文本为空");
-        return;
-    }
 
     Json::Value ret;
 
@@ -91,19 +85,11 @@ void Code::releaseExperiment(const HttpRequestPtr &req, std::function<void(const
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"未带上任何数据，无法添加实验");
+    Json::Value data;
+    std::vector<std::string> params={ "classId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("classId"))
-    {
-        azh::drogon::returnFalse(callback,"请带上班级id，以提交实验数据");
-        return;
-    }
 
     std::string classId=data["classId"].as<std::string>();
 
@@ -137,19 +123,11 @@ void Code::getUnfinishedExperiment(const HttpRequestPtr &req, std::function<void
 
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnTrue(callback,"获取失败，未知的请求",ret);
+    Json::Value data;
+    std::vector<std::string> params={ "studentId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback,ret))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("studentId"))
-    {
-        azh::drogon::returnTrue(callback,"请带上学生id，以请求实验数据",ret);
-        return;
-    }
 
     std::string studentId=data["studentId"].as<std::string>();
     auto clientPtr = drogon::app().getDbClient("POC");
@@ -192,19 +170,11 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
 
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"获取失败，未知的请求",ret);
+    Json::Value data;
+    std::vector<std::string> params={ "studentId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback,ret))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("studentId"))
-    {
-        azh::drogon::returnFalse(callback,"请带上学生id，以请求实验数据",ret);
-        return;
-    }
 
     std::string studentId=data["studentId"].as<std::string>();
     auto clientPtr = drogon::app().getDbClient("POC");
@@ -242,31 +212,11 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
 {
     auto str=req->getBody();
     
-    if(str.empty())
-    {
-        azh::drogon::returnFalse(callback,"未带上任何数据，无法提交实验");
+    Json::Value data;
+    std::vector<std::string> params={ "studentId","experimentId","code" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
         return;
-    }
-
-    Json::Value data=azh::json::toJson(str.data());
-
-    if(!data.find("studentId"))
-    {
-        azh::drogon::returnFalse(callback,"请带上学生id，以提交实验数据");
-        return;
-    }
-
-    if(!data.find("experimentId"))
-    {
-        azh::drogon::returnFalse(callback,"请带上实验id，以提交实验数据");
-        return;
-    }
-
-    if(!data.find("code"))
-    {
-        azh::drogon::returnFalse(callback,"请带上代码，以提交实验数据");
-        return;
-    }
 
     std::string studentId=data["studentId"].as<std::string>();
     std::string experimentId=data["experimentId"].as<std::string>();
