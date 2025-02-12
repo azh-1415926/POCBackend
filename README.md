@@ -273,10 +273,11 @@
 1. 获取题目
     * Url : `/Code/getquiz`
     * Method : Post
-    * RequiredData : chapter(string)
+    * RequiredData : chapter(string)、studentId(string)
         ```json
         {
-            "chapter": 1
+            "chapter": 1,
+            "studentId": "2109104047"
         }
         ```
     * Response : 返回 name(string)、content(string)，如下所示:
@@ -287,20 +288,51 @@
                 "B": "\u7a0b\u5e8f\u7ffb\u8bd1",
                 "C": "\u7a0b\u5e8f\u8c03\u8bd5",
                 "D": "\u6570\u636e\u5904\u7406",
-                "answer": "B",
+                // "answer": "B",
+                "collected": 1,
                 "content": "\u7f16\u8bd1\u5668\u7684\u4e3b\u8981\u529f\u80fd\u662f\u4ec0\u4e48\uff1f",
-                "type": 0
+                "type": 0,
+                ""
             },
             "1": {
                 "A": "\u5c06\u6e90\u4ee3\u7801\u5206\u89e3\u6210\u591a\u4e2a\u8bed\u53e5",
                 "B": "\u5c06\u6e90\u4ee3\u7801\u5206\u89e3\u6210\u591a\u4e2a\u5355\u8bcd",
                 "C": "\u68c0\u67e5\u6e90\u4ee3\u7801\u7684\u8bed\u6cd5\u6b63\u786e\u6027",
                 "D": "\u5c06\u5355\u8bcd\u8f6c\u6362\u4e3a\u76f8\u5e94\u7684\u8bed\u6cd5\u5355\u4f4d",
-                "answer": "B",
+                // "answer": "B",
+                "collected": 0,
                 "content": "\u8bcd\u6cd5\u5206\u6790\u5668\u7684\u4e3b\u8981\u4efb\u52a1\u662f\u4ec0\u4e48\uff1f",
                 "type": 0
             },
             "count": 2,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true"
+        }
+        ```
+2. 获取收藏题目
+    * Url : `/Code/getCollectedQuiz`
+    * Method : Post
+    * RequiredData : chapter(string)、studentId(string)
+        ```json
+        {
+            "chapter": 1,
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 返回 name(string)、content(string)，如下所示:
+        ```json
+        {
+            "0": {
+                "A": "\u7a0b\u5e8f\u8bbe\u8ba1",
+                "B": "\u7a0b\u5e8f\u7ffb\u8bd1",
+                "C": "\u7a0b\u5e8f\u8c03\u8bd5",
+                "D": "\u6570\u636e\u5904\u7406",
+                // "answer": "B",
+                "collected": 1,
+                "content": "\u7f16\u8bd1\u5668\u7684\u4e3b\u8981\u529f\u80fd\u662f\u4ec0\u4e48\uff1f",
+                "type": 0
+            },
+            "count": 1,
             "info": "\u83b7\u53d6\u6210\u529f",
             "result": "true"
         }
