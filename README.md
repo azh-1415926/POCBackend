@@ -67,7 +67,7 @@
 
 **班级模块**
 
-文档里已有接口：/Class/info、/Class/allocate、/Class/getClassByTeacher
+文档里已有接口：/Class/info、/Class/allocate、/Class/getClassByTeacher、/Class/getStudentByClass
 
 1. 班级信息
     * Url : `/Class/info`
@@ -123,6 +123,32 @@
                 "name": "21\u8f6f\u4ef62\u73ed"
             },
             "count": 1,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true"
+        }
+        ```
+
+4. 获取班级内的所有学生
+* Url : `/Class/getStudentByClass`
+    * Method : Post
+    * RequiredData : id(string),userId(string)
+        ```json
+        {
+            "id": "21091040"
+        }
+        ```
+    * Response : 正确返回
+        ```json
+                {
+            "0": {
+                "id": "2109104039",
+                "name": "czs"
+            },
+            "1": {
+                "id": "2109104047",
+                "name": "azh"
+            },
+            "count": 2,
             "info": "\u83b7\u53d6\u6210\u529f",
             "result": "true"
         }
@@ -189,7 +215,7 @@
         ```
 **代码模块**
 
-文档里已有接口：/Code/compile、/Code/releaseExperiment、/Code/getUnfinishedExperiment、/Code/getExperiment、/Code/submit
+文档里已有接口：/Code/compile、/Code/releaseExperiment、/Code/getUnfinishedExperiment、/Code/getExperiment、/Code/submit、/Code/getExperimentByStudent、/Code/submitScore
 
 1. 获取编译结果
     * Url : `/Code/compile`
@@ -281,6 +307,73 @@
         ```json
         // 暂无
         ```
+6. 获取学生完成且未批改的实验
+    * Url : `/Code/getExperimentByStudent`
+    * Method : Post
+    * RequiredData : studentId(string)
+        ```json
+        {
+            "id": "2109104047"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+        {
+            "0": {
+                "code": "#include <stdio.h>\n\nint main()\n{\n\tprintf(\"Hello World!\n\");\n\treturn 0;\n}",
+                "content": "\u7f16\u5199\u4e00\u6bb5\u7a0b\u5e8f\uff0c\u8fd0\u884c\u67e5\u770b\u7ed3\u679c",
+                "id": "1",
+                "name": "\u7b2c\u4e00\u7ae0-\u719f\u6089 C \u7f16\u8bd1\u73af\u5883"
+            },
+            "1": {
+                "code": "#include <stdio.h>\n\nint main()\n{\n\tprintf(\"Hello World!\n\");\n\treturn 0;\n}",
+                "content": "\u8bed\u6cd5\u5206\u6790",
+                "id": "2",
+                "name": "\u7b2c\u4e8c\u7ae0 \u8bed\u6cd5\u5206\u6790"
+            },
+            "2": {
+                "code": "#include <stdio.h>\n\nint main()\n{\n\tprintf(\"Hello World!\n\");\n\treturn 0;\n}",
+                "content": "\u8bcd\u6cd5\u5206\u6790",
+                "id": "3",
+                "name": "\u7b2c\u4e09\u6b21\u5b9e\u9a8c \u8bcd\u6cd5\u5206\u6790"
+            },
+            "3": {
+                "code": "#include <stdio.h>\n\nint main()\n{\n\tprintf(\"Hello World!\n\");\n\treturn 0;\n}",
+                "content": "\u7406\u89e3\u5e76\u638c\u63e1\u5c5e\u6027\u6587\u6cd5",
+                "id": "4",
+                "name": "\u7b2c\u56db\u7ae0 \u5c5e\u6027\u6587\u6cd5"
+            },
+            "4": {
+                "code": "#include <stdio.h>\n\nint main()\n{\n\tprintf(\"Hello World!\n\");\n\treturn 0;\n}",
+                "content": "\u7406\u89e3\u5e76\u638c\u63e1\u5c5e\u6027\u6587\u6cd5",
+                "id": "5",
+                "name": "\u7b2c\u56db\u7ae0 \u5c5e\u6027\u6587\u6cd5"
+            },
+            "count": 5,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true"
+        }
+        ```
+
+7. 提交批改分数
+    * Url : `/Code/submitScore`
+    * Method : Post
+    * RequiredData : studentId(string)、experimentId(string)、score(int)
+        ```json
+        {
+            "experimentId": "1",
+            "score": 99,
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+        {
+            "info":"\u63d0\u4ea4\u6210\u529f",
+            "result":"true"
+        }
+        ```
+
 **题目模块**
 
 文档里已有接口：/Quiz/getquiz、/Quiz/getCollectedQuiz、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/getChapter

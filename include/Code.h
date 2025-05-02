@@ -17,6 +17,8 @@ class Code : public drogon::HttpController<Code>
     METHOD_ADD(Code::getUnfinishedExperiment,"/getUnfinishedExperiment",Post);
     METHOD_ADD(Code::getExperiment,"/getExperiment",Post);
     METHOD_ADD(Code::submitExperiment,"/submit",Post);
+    METHOD_ADD(Code::getExperimentByStudent,"/getExperimentByStudent",Post);
+    METHOD_ADD(Code::submitScore,"/submitScore",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -31,5 +33,9 @@ class Code : public drogon::HttpController<Code>
     void getExperiment(const HttpRequestPtr &req,
                 std::function<void (const HttpResponsePtr &)> &&callback);
     void submitExperiment(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+    void getExperimentByStudent(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+    void submitScore(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
 };

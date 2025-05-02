@@ -255,8 +255,74 @@ void Code::submitExperiment(const HttpRequestPtr &req, std::function<void(const 
         return;
     }
 
-    clientPtr->execSqlSync("insert into experiment_record values(NULL,'"+studentId+"','"+experimentId+"','"+data["code"].as<std::string>()+"',NOW())");
+    clientPtr->execSqlSync("insert into experiment_record values(NULL,'"+studentId+"',"+experimentId+",'"+data["code"].as<std::string>()+"',NOW(),0,0)");
     // submit
 
     azh::drogon::returnTrue(callback,"提交成功");
+}
+
+void Code::getExperimentByStudent(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    std::string studentId=data["id"].as<std::string>();
+
+    Json::Value ret;
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    std::string query="SELECT e.id,e.name,e.content,er.code "
+        "FROM experiment_record er "
+        "LEFT JOIN experiment e ON er.experiment_id = e.id "
+        "LEFT JOIN student s ON s.id = er.student_id "
+        "WHERE s.id='"+studentId+"' and er.isCorrect=0;";
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
+
+    int count=0;
+
+    for (auto row : result)
+    {
+        Json::Value info;
+        info["id"]=row["id"].as<std::string>();
+        info["name"]=row["name"].as<std::string>();
+        info["content"]=row["content"].as<std::string>();
+        info["code"]=row["code"].as<std::string>();
+
+        ret[std::to_string(count)]=info;
+
+        count++;
+    }
+
+    ret["count"]=count;
+    
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
+
+void Code::submitScore(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "studentId","experimentId","score" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    std::string studentId=data["studentId"].as<std::string>();
+    std::string experimentId=data["experimentId"].as<std::string>();
+    int score=data["score"].as<int>();
+
+    Json::Value ret;
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    clientPtr->execSqlSync("update experiment_record set score="+std::to_string(score)+",isCorrect=1 where student_id='"+studentId+"' and experiment_id="+experimentId+";");
+
+    azh::drogon::returnTrue(callback,"提交成功",ret);
 }

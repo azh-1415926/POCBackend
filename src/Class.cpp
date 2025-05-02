@@ -140,3 +140,44 @@ void Class::getClassByTeacher(const HttpRequestPtr &req, std::function<void(cons
     ret["count"]=count;
     azh::drogon::returnTrue(callback,"获取成功",ret);
 }
+
+void Class::getStudentByClass(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "id" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    Json::Value ret;
+
+    std::string classId=data["id"].as<std::string>();
+    int count=0;
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    const std::string& query="SELECT s.id,u.name "
+        "FROM student s "
+        "LEFT JOIN users u ON s.id = u.id "
+        "WHERE s.class_id='"+classId+"'";
+
+    const drogon::orm::Result &resultOfClass=clientPtr->execSqlSync(query);
+
+    bool isFound=false;
+
+    for(auto row : resultOfClass)
+    {
+        Json::Value info;
+        
+        info["id"]=row["id"].as<std::string>();
+        info["name"]=row["name"].as<std::string>();
+
+        ret[std::to_string(count)]=info;
+        count++;
+    }
+
+    ret["count"]=count;
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
