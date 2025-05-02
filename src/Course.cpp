@@ -8,7 +8,7 @@ void Course::getOutline(const HttpRequestPtr &req, std::function<void(const Http
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from course_content where section=0");
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from course_content where id in (select course_content_id from course where section=0)");
 
     int countOfChapter=result.size();
 
@@ -16,7 +16,7 @@ void Course::getOutline(const HttpRequestPtr &req, std::function<void(const Http
     {
         Json::Value course;
         
-        const drogon::orm::Result &resultOfSection=clientPtr->execSqlSync("select * from course_content where chapter="+std::to_string(i));
+        const drogon::orm::Result &resultOfSection=clientPtr->execSqlSync("select * from course_content where id in (select course_content_id from course where chapter="+std::to_string(i)+")");
 
         int countOfSection=resultOfSection.size();
 
@@ -54,7 +54,7 @@ void Course::getCourse(const HttpRequestPtr &req, std::function<void(const HttpR
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from course_content where chapter="+chapter+" and section="+section);
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from course_content where id in (select course_content_id from course where chapter="+chapter+" and section="+section+")");
 
     bool isFound=false;
 
@@ -99,7 +99,7 @@ void Course::updateCourse(const HttpRequestPtr &req, std::function<void(const Ht
 
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from course_content where chapter="+chapter+" and section="+section);
+    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from course_content where id in (select course_content_id from course where chapter="+chapter+" and section="+section+")");
 
     bool isFound=false;
 
@@ -114,7 +114,7 @@ void Course::updateCourse(const HttpRequestPtr &req, std::function<void(const Ht
         return;
     }
 
-    clientPtr->execSqlSync("update course_content set content='"+content+"' where chapter="+chapter+" and section="+section);
+    clientPtr->execSqlSync("update course_content set content='"+content+"' where id in (select course_content_id from course where chapter="+chapter+" and section="+section+")");
 
     azh::drogon::returnTrue(callback,"更新成功",ret);
 }
