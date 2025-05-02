@@ -134,8 +134,8 @@ void Code::getUnfinishedExperiment(const HttpRequestPtr &req, std::function<void
 
     std::string query="SELECT e.* "
         "FROM experiment e "
-        "LEFT JOIN experiment_record er ON e.id = er.experiment_id "
-        "LEFT JOIN student s ON e.class_id = s.class_id AND er.student_id = s.id AND er.student_id = '"+studentId+"' "
+        "LEFT JOIN experiment_record er ON e.id = er.experiment_id AND er.student_id = '"+studentId+"' "
+        "LEFT JOIN student s ON e.class_id = s.class_id AND er.student_id = s.id "
         "WHERE er.id IS NULL;";
 
     const drogon::orm::Result &result=clientPtr->execSqlSync(query);
@@ -278,9 +278,9 @@ void Code::getExperimentByStudent(const HttpRequestPtr &req, std::function<void(
 
     std::string query="SELECT e.id,e.name,e.content,er.code "
         "FROM experiment_record er "
-        "LEFT JOIN experiment e ON er.experiment_id = e.id "
+        "LEFT JOIN experiment e ON er.experiment_id = e.id and er.student_id='"+studentId+"' "
         "LEFT JOIN student s ON s.id = er.student_id "
-        "WHERE s.id='"+studentId+"' and er.isCorrect=0;";
+        "WHERE er.isCorrect=0 and e.id is not null;";
 
     const drogon::orm::Result &result=clientPtr->execSqlSync(query);
 
