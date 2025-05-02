@@ -24,6 +24,8 @@ class Manager : public drogon::HttpController<Manager>
     METHOD_ADD(Manager::statUser,"/statUser",Post);
     METHOD_ADD(Manager::statClass,"/statClass",Post);
     METHOD_ADD(Manager::statQuiz,"/statQuiz",Post);
+    METHOD_ADD(Manager::userBatch,"/userBatch",Post);
+    METHOD_ADD(Manager::classBatch,"/classBatch",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -61,5 +63,9 @@ class Manager : public drogon::HttpController<Manager>
     void statClass(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
     void statQuiz(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+    void userBatch(const HttpRequestPtr &req,
+               std::function<void (const HttpResponsePtr &)> &&callback);
+    void classBatch(const HttpRequestPtr &req,
                std::function<void (const HttpResponsePtr &)> &&callback);
 };

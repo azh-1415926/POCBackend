@@ -658,3 +658,120 @@ void Manager::statQuiz(const HttpRequestPtr &req, std::function<void(const HttpR
 
     azh::drogon::returnTrue(callback,"获取成功",ret);
 }
+
+void Manager::userBatch(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "token","count" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    int count=data["count"].as<int>();
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    Json::Value ret;
+
+    int countOfAdd=0;
+    int countOfAlter=0;
+
+    for(int i=0;i<count;i++)
+    {
+        Json::Value row=data[std::to_string(i)];
+        const drogon::orm::Result &result=clientPtr->execSqlSync("select * from users where id='"+row["id"].as<std::string>()+"'");
+
+        bool isFound=false;
+        for(auto r : result)
+        {
+            isFound=true;
+        }
+
+        if(!isFound)
+        {
+            clientPtr->execSqlSync("insert into users values('"+row["id"].as<std::string>()+"','"+row["name"].as<std::string>()+"','"+row["password"].as<std::string>()+"',"+(row["role"].as<std::string>())+",NOW(),NOW(),NOW());");
+            countOfAdd++;
+        }
+        else
+        {
+            clientPtr->execSqlSync("update users set name='"+row["name"].as<std::string>()+"',password='"+row["password"].as<std::string>()+"',update_time=NOW() where id='"+row["id"].as<std::string>()+"';");
+            countOfAlter++;
+        }
+    }
+    
+    azh::drogon::returnTrue(callback,"处理成功,新增"+std::to_string(countOfAdd)+"条记录,新增"+std::to_string(countOfAlter)+"条记录",ret);
+}
+
+void Manager::classBatch(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "token","count" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    int count=data["count"].as<int>();
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    Json::Value ret;
+
+    int countOfAdd=0;
+    int countOfAlter=0;
+    int countOfError=0;
+
+    for(int i=0;i<count;i++)
+    {
+        Json::Value row=data[std::to_string(i)];
+        const drogon::orm::Result &resultOfTeacher=clientPtr->execSqlSync("select * from users where role=1 and id='"+row["teacherId"].as<std::string>()+"'");
+        
+        bool teacherIsFound=false;
+        for(auto r : resultOfTeacher)
+        {
+            teacherIsFound=true;
+        }
+
+        if(!teacherIsFound)
+        {
+            countOfError++;
+            continue;
+        }
+
+        const drogon::orm::Result &result=clientPtr->execSqlSync("select * from class where id='"+row["id"].as<std::string>()+"'");
+
+        bool isFound=false;
+        for(auto r : result)
+        {
+            isFound=true;
+        }
+
+        if(!isFound)
+        {
+            clientPtr->execSqlSync("insert into class values('"+row["id"].as<std::string>()+"','"+row["name"].as<std::string>()+"','"+row["teacherId"].as<std::string>()+"');");
+            countOfAdd++;
+        }
+        else
+        {
+            clientPtr->execSqlSync("update class set name='"+row["name"].as<std::string>()+"',teacher_id='"+row["teacherId"].as<std::string>()+"' where id='"+row["id"].as<std::string>()+"';");
+            countOfAlter++;
+        }
+    }
+    
+    azh::drogon::returnTrue(callback,"处理成功,新增"+std::to_string(countOfAdd)+"条记录,修改"+std::to_string(countOfAlter)+"条记录,失败了"+std::to_string(countOfError)+"次(教师id错误)",ret);
+}

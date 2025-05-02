@@ -502,7 +502,7 @@
         ```
 **管理模块**
 
-文档里已有接口：/Manager/isValid?userId={1}、/Manager/addUser、/Manager/removeUser、/Manager/alterUser、/Manager/addClass、/Manager/removeClass、/Manager/alterClass、/Manager/getUser、/Manager/getClass、/Manager/statUser、/Manager/statClass、/Manager/statQuiz
+文档里已有接口：/Manager/isValid?userId={1}、/Manager/addUser、/Manager/removeUser、/Manager/alterUser、/Manager/addClass、/Manager/removeClass、/Manager/alterClass、/Manager/getUser、/Manager/getClass、/Manager/statUser、/Manager/statClass、/Manager/statQuiz、/Manager/userBatch、/Manager/classBatch
 
 1. 判断用户是否存在
     * Url : `/Manager/isValid?userId={1}`
@@ -846,4 +846,60 @@
             "result": "true",
             "row": 8
         }
+        ```
+13. 批量操作用户
+    * Url : `/Manager/userBatch`
+    * Method : Post
+    * RequiredData : token(string)、count(int)
+        ```json
+        {
+            "0": {
+                "id": "2109104047",
+                "name": "azh",
+                "password": "123456",
+                "role": "0"
+            },
+            "1": {
+                "id": "2109104054",
+                "name": "zty",
+                "password": "123456",
+                "role": "0"
+            },
+            "count": 2,
+            "token": "f2a72ce1-2f9f-49d5-9398-ba424a1d5c10"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+            {
+                "info": "\u5904\u7406\u6210\u529f,\u65b0\u589e1\u6761\u8bb0\u5f55,\u65b0\u589e1\u6761\u8bb0\u5f55",
+                "result": "true"
+            }
+        ```
+14. 批量操作班级
+    * Url : `/Manager/classBatch`
+    * Method : Post
+    * RequiredData : token(string)、count(int)
+        ```json
+        {
+            "0": {
+                "id": "21091040",
+                "name": "21软件本(2)班",
+                "teacherId": "20250115"
+            },
+            "1": {
+                "id": "21091030",
+                "name": "21软件本(1)班",
+                "teacherId": "20250114"
+            },
+            "count": 2,
+            "token": "fb78630a-8871-4bb1-9215-2d6259e7240e"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+            {
+                "info": "\u5904\u7406\u6210\u529f,\u65b0\u589e1\u6761\u8bb0\u5f55,\u4fee\u65391\u6761\u8bb0\u5f55,\u5931\u8d25\u4e860\u6b21(\u6559\u5e08id\u9519\u8bef)",
+                "result": "true"
+            }
         ```
