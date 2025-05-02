@@ -11,6 +11,9 @@
 可分为用户、班级、课程、代码、题目、管理模块，均会返回result(string),info(string)。
 
 **用户模块**
+
+文档里已有接口：/User/login、/User/info、/User/getUnallocatedStudent
+
 1. 用户登录
     * Url : `/User/login`
     * Method : Post
@@ -63,6 +66,9 @@
 
 
 **班级模块**
+
+文档里已有接口：/Class/info、/Class/allocate、/Class/getClassByTeacher
+
 1. 班级信息
     * Url : `/Class/info`
     * Method : Post
@@ -123,6 +129,9 @@
         ```
 
 **课程模块**
+
+文档里已有接口：/Course/getOutline、/Course/getCourse、/Course/update
+
 1. 获取大纲数据
     * Url : `/Course/getOutline`
     * Method : Post
@@ -179,6 +188,9 @@
         }
         ```
 **代码模块**
+
+文档里已有接口：/Code/compile、/Code/releaseExperiment、/Code/getUnfinishedExperiment、/Code/getExperiment、/Code/submit
+
 1. 获取编译结果
     * Url : `/Code/compile`
     * Method : Post
@@ -255,7 +267,7 @@
             "result":"true"
         }
         ```
-3. 提交实验
+5. 提交实验
     * Url : `/Code/submit`
     * Method : Post
     * RequiredData : code(string)、experimentId(string)
@@ -270,8 +282,11 @@
         // 暂无
         ```
 **题目模块**
+
+文档里已有接口：/Quiz/getquiz、/Quiz/getCollectedQuiz、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/getChapter
+
 1. 获取题目
-    * Url : `/Code/getquiz`
+    * Url : `/Quiz/getquiz`
     * Method : Post
     * RequiredData : chapter(string)、studentId(string)
         ```json
@@ -310,7 +325,7 @@
         }
         ```
 2. 获取收藏题目
-    * Url : `/Code/getCollectedQuiz`
+    * Url : `/Quiz/getCollectedQuiz`
     * Method : Post
     * RequiredData : chapter(string)、studentId(string)
         ```json
@@ -337,9 +352,67 @@
             "result": "true"
         }
         ```
+3. 收藏题目
+    * Url : `/Quiz/collectQuiz`
+    * Method : Post
+    * RequiredData : chapter(string)、studentId(string)、data(array)
+        ```json
+        {
+            "chapter": 1,
+            "data": [
+                0,
+                2
+            ],
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 返回 name(string)、content(string)，如下所示:
+        ```json
+        {
+            "info":"\u6267\u884c\u6210\u529f",
+            "result":"true"
+        }
+        ```
+4. 收藏题目
+    * Url : `/Quiz/uncollectQuiz`
+    * Method : Post
+    * RequiredData : chapter(string)、studentId(string)、data(array)
+        ```json
+        {
+            "chapter": 1,
+            "data": [
+            ],
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 返回 name(string)、content(string)，如下所示:
+        ```json
+        {
+            "info":"\u6267\u884c\u6210\u529f",
+            "result":"true"
+        }
+        ```
+4. 获取最高章节
+    * Url : `/Quiz/getChapter`
+    * Method : Post
+    * RequiredData : None
+        ```json
+        {
+        }
+        ```
+    * Response : 返回 name(string)、content(string)，如下所示:
+        ```json
+        {
+            "chapter":1,"info":"\u83b7\u53d6\u6210\u529f",
+            "result":"true"
+        }
+        ```
 **管理模块**
+
+文档里已有接口：/Manager/isValid?userId={1}、/Manager/addUser、/Manager/removeUser、/Manager/alterUser、/Manager/addClass、/Manager/removeClass、/Manager/alterClass、/Manager/getUser、/Manager/getClass、/Manager/statUser、/Manager/statClass、/Manager/statQuiz
+
 1. 判断用户是否存在
-    * Url : `/isValid?userId={1}`
+    * Url : `/Manager/isValid?userId={1}`
     * Method : Get
     * RequiredData : userId(string)
     * Response : 返回数据，如下所示:
@@ -461,22 +534,223 @@
 8. 获取用户详细信息
     * Url : `/Manager/getUser`
     * Method : Post
-    * RequiredData : 暂无
+    * RequiredData : token(string)
         ```json
-        // 暂无
+        {
+            "token": "e940aaa4-16f0-4d49-b62d-53a3652b1d02"
+        }
         ```
     * Response : 返回数据，如下所示:
         ```json
-        // 暂无
+        {
+            "0": {
+                "0": "\u59d3\u540d",
+                "1": "\u7f16\u53f7",
+                "2": "\u804c\u4f4d",
+                "3": "\u73ed\u7ea7\u540d",
+                "4": "\u6700\u540e\u767b\u5f55\u65f6\u95f4"
+            },
+            "1": {
+                "0": "czs",
+                "1": "2109104039",
+                "2": "\u5b66\u751f",
+                "3": "21\u8f6f\u4ef62\u73ed",
+                "4": "2025-02-05 16:17:16"
+            },
+            "2": {
+                "0": "azh",
+                "1": "2109104047",
+                "2": "\u5b66\u751f",
+                "3": "21\u8f6f\u4ef62\u73ed",
+                "4": "2024-11-18 09:19:44"
+            },
+            "3": {
+                "0": "hhhhhh",
+                "1": "1233",
+                "2": "\u6559\u5e08",
+                "3": "",
+                "4": "2024-12-27 15:29:29"
+            },
+            "4": {
+                "0": "zjt",
+                "1": "20250114",
+                "2": "\u6559\u5e08",
+                "3": "",
+                "4": "2025-01-14 17:00:07"
+            },
+            "5": {
+                "0": "gc",
+                "1": "20250115",
+                "2": "\u6559\u5e08",
+                "3": "",
+                "4": "2025-01-15 10:27:35"
+            },
+            "col": 5,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true",
+            "row": 6
+        }
         ```
 9. 获取班级详细信息
     * Url : `/Manager/getClass`
     * Method : Post
-    * RequiredData : 暂无
+    * RequiredData : token(string)
         ```json
-        // 暂无
+        {
+            "token": "e940aaa4-16f0-4d49-b62d-53a3652b1d02"
+        }
         ```
     * Response : 返回数据，如下所示:
         ```json
-        // 暂无
+        {
+            "0": {
+                "0": "\u540d\u79f0",
+                "1": "\u7f16\u53f7",
+                "2": "\u4efb\u8bfe\u6559\u5e08",
+                "3": "\u5b66\u751f\u603b\u6570"
+            },
+            "1": {
+                "0": "21\u8f6f\u4ef62\u73ed",
+                "1": "21091040",
+                "2": "gc",
+                "3": "2"
+            },
+            "col": 4,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true",
+            "row": 2
+        }
+        ```
+
+10. 统计用户信息
+    * Url : `/Manager/statUser`
+    * Method : Post
+    * RequiredData : token(string)
+        ```json
+        {
+            "token": "e940aaa4-16f0-4d49-b62d-53a3652b1d02"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+        {
+            "0": {
+                "0": "\u540d\u79f0",
+                "1": "\u7edf\u8ba1"
+            },
+            "1": {
+                "0": "\u7528\u6237\u603b\u6570",
+                "1": "6"
+            },
+            "2": {
+                "0": "\u5b66\u751f\u603b\u6570",
+                "1": "2"
+            },
+            "3": {
+                "0": "\u6559\u5e08\u603b\u6570",
+                "1": "3"
+            },
+            "4": {
+                "0": "\u6700\u8fd1\u767b\u5f55\u7528\u6237",
+                "1": "gc"
+            },
+            "5": {
+                "0": "\u4e0d\u6d3b\u8dc3\u7528\u6237",
+                "1": "hhhhhh"
+            },
+            "col": 2,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true",
+            "row": 6
+        }
+        ```
+
+11. 统计班级信息
+    * Url : `/Manager/statClass`
+    * Method : Post
+    * RequiredData : token(string)
+        ```json
+        {
+            "token": "e940aaa4-16f0-4d49-b62d-53a3652b1d02"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+        {
+            "0": {
+                "0": "\u540d\u79f0",
+                "1": "\u7edf\u8ba1"
+            },
+            "1": {
+                "0": "\u73ed\u7ea7\u603b\u6570",
+                "1": "1"
+            },
+            "2": {
+                "0": "\u7ba1\u7406\u73ed\u7ea7\u6700\u591a\u7684\u6559\u5e08",
+                "1": "20250115"
+            },
+            "3": {
+                "0": "\u4eba\u6570\u6700\u591a\u7684\u73ed\u7ea7",
+                "1": "21091040"
+            },
+            "4": {
+                "0": "\u4eba\u6570\u6700\u5c11\u7684\u73ed\u7ea7",
+                "1": "21091040"
+            },
+            "col": 2,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true",
+            "row": 5
+        }
+        ```
+
+12. 统计题目信息
+    * Url : `/Manager/statQuiz`
+    * Method : Post
+    * RequiredData : token(string)
+        ```json
+        {
+            "token": "e940aaa4-16f0-4d49-b62d-53a3652b1d02"
+        }
+        ```
+    * Response : 返回数据，如下所示:
+        ```json
+            {
+            "0": {
+                "0": "\u540d\u79f0",
+                "1": "\u7edf\u8ba1"
+            },
+            "1": {
+                "0": "\u9898\u76ee\u603b\u6570",
+                "1": "62"
+            },
+            "2": {
+                "0": "\u9009\u62e9\u9898\u603b\u6570",
+                "1": "40"
+            },
+            "3": {
+                "0": "\u5224\u65ad\u9898\u603b\u6570",
+                "1": "11"
+            },
+            "4": {
+                "0": "\u586b\u7a7a\u9898\u603b\u6570",
+                "1": "10"
+            },
+            "5": {
+                "0": "\u7f16\u7a0b\u9898\u603b\u6570",
+                "1": "1"
+            },
+            "6": {
+                "0": "\u6700\u591a\u6536\u85cf\u7684\u9898\u76eeid",
+                "1": "1"
+            },
+            "7": {
+                "0": "\u6700\u6613\u9519\u7684\u9898\u76eeid",
+                "1": "N/A"
+            },
+            "col": 2,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true",
+            "row": 8
+        }
         ```

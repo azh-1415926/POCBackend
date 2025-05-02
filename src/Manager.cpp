@@ -147,6 +147,7 @@ void Manager::alterUser(const HttpRequestPtr &req, std::function<void(const Http
     }
 
     clientPtr->execSqlSync("update users set name='"+data["name"].as<std::string>()+"',password='"+data["password"].as<std::string>()+"',role="+data["role"].as<std::string>()+" where id='"+data["id"].as<std::string>()+"'");
+    clientPtr->execSqlSync("update users set update_time=NOW() where id='"+data["id"].as<std::string>()+"'");
 
     azh::drogon::returnTrue(callback,"修改成功");
 }
@@ -378,6 +379,279 @@ void Manager::getClass(const HttpRequestPtr &req, std::function<void(const HttpR
         
         ret[std::to_string(rowCount)]=userInfo;
         rowCount++;
+    }
+
+    ret["row"]=rowCount;
+
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
+
+
+void Manager::statUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "token" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    int rowCount=1;
+
+    Json::Value ret;
+    
+    Json::Value title;
+    title["0"]="名称";
+    title["1"]="统计";
+
+    ret["col"]=2;
+    ret["0"]=title;
+
+    std::string query="SELECT "
+        // "-- 用户总数 "
+        "(SELECT COUNT(*) FROM users) AS total_users,"
+        // "-- 学生总数"
+        "(SELECT COUNT(*) FROM users WHERE role = 0) AS total_students,"
+        // "-- 教师总数"
+        "(SELECT COUNT(*) FROM users WHERE role = 1) AS total_teachers,"
+        // "-- 最近登录的用户"
+        "(SELECT name FROM users WHERE role = 0 || role=1 ORDER BY last_login_time DESC LIMIT 1) AS recent_login_user,"
+        // "-- 最久未登录的用户"
+        "(SELECT name FROM users WHERE role = 0 || role=1 ORDER BY last_login_time ASC LIMIT 1) AS inactive_user;";
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
+
+    Json::Value totalUsers;
+    Json::Value totalStudents;
+    Json::Value totalTeachers;
+    Json::Value recentLoginUser;
+    Json::Value inactiveUser;
+
+    for (auto row : result)
+    {
+        Json::Value userInfo;
+
+        totalUsers["0"]="用户总数";
+        totalUsers["1"]=row["total_users"].as<std::string>();
+        totalStudents["0"]="学生总数";
+        totalStudents["1"]=row["total_students"].as<std::string>();
+        totalTeachers["0"]="教师总数";
+        totalTeachers["1"]=row["total_teachers"].as<std::string>();
+        recentLoginUser["0"]="最近登录用户";
+        recentLoginUser["1"]=row["recent_login_user"].as<std::string>();
+        inactiveUser["0"]="不活跃用户";
+        inactiveUser["1"]=row["inactive_user"].as<std::string>();
+
+        ret["1"]=totalUsers;
+        ret["2"]=totalStudents;
+        ret["3"]=totalTeachers;
+        ret["4"]=recentLoginUser;
+        ret["5"]=inactiveUser;
+
+        rowCount=6;
+    }
+
+    ret["row"]=rowCount;
+
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
+
+void Manager::statClass(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "token" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    int rowCount=1;
+
+    Json::Value ret;
+    
+    Json::Value title;
+    title["0"]="名称";
+    title["1"]="统计";
+
+    ret["col"]=2;
+    ret["0"]=title;
+
+    std::string query="SELECT "
+        // 班级总数，查询为 NULL 时为 0
+        "COALESCE((SELECT COUNT(*) FROM class), 0) AS total_classes,"
+        // 管理班级最多的教师id，查询为 NULL 时为 'N/A'
+        "COALESCE("
+        "    (SELECT teacher_id "
+        "     FROM class "
+        "     GROUP BY teacher_id "
+        "     ORDER BY COUNT(*) DESC "
+        "     LIMIT 1), "
+        "    'N/A'"
+        ") AS most_active_teacher_id,"
+        // 班级人数最多的班级，查询为 NULL 时为 'N/A'
+        "COALESCE("
+        "    (SELECT class_id "
+        "     FROM student "
+        "     GROUP BY class_id "
+        "     ORDER BY COUNT(*) DESC "
+        "     LIMIT 1), "
+        "    'N/A'"
+        ") AS most_popular_class_id,"
+        // 班级人数最少的班级，查询为 NULL 时为 'N/A'
+        "COALESCE("
+        "    (SELECT class_id "
+        "     FROM student "
+        "     GROUP BY class_id "
+        "     ORDER BY COUNT(*) ASC "
+        "     LIMIT 1), "
+        "    'N/A'"
+        ") AS least_popular_class_id;";
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
+
+    Json::Value totalClass;
+    Json::Value activeTeacher;
+    Json::Value activeClass;
+    Json::Value inactiveClass;
+
+    for (auto row : result)
+    {
+        Json::Value userInfo;
+
+        totalClass["0"]="班级总数";
+        totalClass["1"]=row["total_classes"].as<std::string>();
+        activeTeacher["0"]="管理班级最多的教师";
+        activeTeacher["1"]=row["most_active_teacher_id"].as<std::string>();
+        activeClass["0"]="人数最多的班级";
+        activeClass["1"]=row["most_popular_class_id"].as<std::string>();
+        inactiveClass["0"]="人数最少的班级";
+        inactiveClass["1"]=row["least_popular_class_id"].as<std::string>();
+
+        ret["1"]=totalClass;
+        ret["2"]=activeTeacher;
+        ret["3"]=activeClass;
+        ret["4"]=inactiveClass;
+
+        rowCount=5;
+    }
+
+    ret["row"]=rowCount;
+
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
+
+void Manager::statQuiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "token" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    if(data["token"].as<std::string>()!=tokenOfAdmin::getInstance().get())
+    {
+        azh::drogon::returnFalse(callback,"获取失败，管理员token无效，请重新登陆");
+        return;
+    }
+
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    int rowCount=1;
+
+    Json::Value ret;
+    
+    Json::Value title;
+    title["0"]="名称";
+    title["1"]="统计";
+
+    ret["col"]=2;
+    ret["0"]=title;
+
+    std::string query="SELECT "
+        // 题目总数
+        "COALESCE((SELECT COUNT(*) FROM quiz), 0) AS total_quizzes,"
+        // 选择题总数
+        "COALESCE((SELECT COUNT(*) FROM quiz WHERE type = 0), 0) AS total_select_choice,"
+        // 判断题总数
+        "COALESCE((SELECT COUNT(*) FROM quiz WHERE type = 1), 0) AS total_judge_choice,"
+        // 填空题总数
+        "COALESCE((SELECT COUNT(*) FROM quiz WHERE type = 2), 0) AS total_fill_blank,"
+        // 编程题总数
+        "COALESCE((SELECT COUNT(*) FROM quiz WHERE type = 3), 0) AS total_coding,"
+        // 收藏数最多的题目id
+        "COALESCE("
+        "    (SELECT quiz_id "
+        "     FROM collected_quiz "
+        "     GROUP BY quiz_id "
+        "     ORDER BY COUNT(*) DESC "
+        "     LIMIT 1), "
+        "    'N/A'"
+        ") AS most_collected_quiz_id,"
+        // 答错数最多的题目id
+        "COALESCE("
+        "    (SELECT quiz_id "
+        "     FROM wrong_quiz "
+        "     GROUP BY quiz_id "
+        "     ORDER BY SUM(wrong_count) DESC "
+        "     LIMIT 1), "
+        "    'N/A'"
+        ") AS most_wrong_quiz_id;";
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
+
+    Json::Value totalQuiz;
+    Json::Value totalSelectChoice;
+    Json::Value totalJudgeChoice;
+    Json::Value totalFillBlank;
+    Json::Value totalCoding;
+    Json::Value mostCollectedQuiz;
+    Json::Value mostWrongQuiz;
+
+    for (auto row : result)
+    {
+        Json::Value userInfo;
+
+        totalQuiz["0"]="题目总数";
+        totalQuiz["1"]=row["total_quizzes"].as<std::string>();
+        totalSelectChoice["0"]="选择题总数";
+        totalSelectChoice["1"]=row["total_select_choice"].as<std::string>();
+        totalJudgeChoice["0"]="判断题总数";
+        totalJudgeChoice["1"]=row["total_judge_choice"].as<std::string>();
+        totalFillBlank["0"]="填空题总数";
+        totalFillBlank["1"]=row["total_fill_blank"].as<std::string>();
+        totalCoding["0"]="编程题总数";
+        totalCoding["1"]=row["total_coding"].as<std::string>();
+        mostCollectedQuiz["0"]="最多收藏的题目id";
+        mostCollectedQuiz["1"]=row["most_collected_quiz_id"].as<std::string>();
+        mostWrongQuiz["0"]="最易错的题目id";
+        mostWrongQuiz["1"]=row["most_wrong_quiz_id"].as<std::string>();
+
+        ret["1"]=totalQuiz;
+        ret["2"]=totalSelectChoice;
+        ret["3"]=totalJudgeChoice;
+        ret["4"]=totalFillBlank;
+        ret["5"]=totalCoding;
+        ret["6"]=mostCollectedQuiz;
+        ret["7"]=mostWrongQuiz;
+
+        rowCount=8;
     }
 
     ret["row"]=rowCount;

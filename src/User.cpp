@@ -58,6 +58,7 @@ void User::login(const HttpRequestPtr &req,
         if(row["password"].as<std::string>()==password)
         {
             isVaild=true;
+            clientPtr->execSqlSync("update users set last_login_time=NOW() where id='"+userId+"'");
         }    
     }
 
