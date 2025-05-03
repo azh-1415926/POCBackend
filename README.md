@@ -283,14 +283,63 @@
     * RequiredData : studentId(string)
         ```json
         {
-            "studentId": "2109104047"
+            "userId": "2109104047"
         }
         ```
     * Response : 返回 name(string)、content(string)，如下所示:
         ```json
         {
-            "count":0,"info":"\u83b7\u53d6\u6210\u529f",
-            "result":"true"
+            "0": {
+                "code": "/* Input two numbers, output the product */\n#include <stdio.h>\nint main()\n{\n\tint x,y,m;\n\tprintf(\"Please input x and y\n\");\n\tscanf(\"%d%d\",&x,&y);\n\tm=x*y;\n\tprintf(\"%d * %d = %d\n\",x,y,m);\n\n\treturn 0;\n}",
+                "content": "\u7f16\u5199\u4e00\u6bb5\u7a0b\u5e8f\uff0c\u8fd0\u884c\u67e5\u770b\u7ed3\u679c",
+                "createTime": "2025-02-10 19:20:09",
+                "experimentId": "1",
+                "finishTime": "2025-05-02 15:48:31",
+                "id": 13,
+                "isCorrect": 1,
+                "name": "\u7b2c\u4e00\u7ae0-\u719f\u6089 C \u7f16\u8bd1\u73af\u5883",
+                "score": 100,
+                "studentId": "2109104047"
+            },
+            "1": {
+                "code": "/* Input two numbers, output the product */\n#include <stdio.h>\nint main()\n{\n\tint x,y,m;\n\tprintf(\"Please input x and y\n\");\n\tscanf(\"%d%d\",&x,&y);\n\tm=x*y;\n\tprintf(\"%d * %d = %d\n\",x,y,m);\n\n\treturn 0;\n}",
+                "content": "\u8bed\u6cd5\u5206\u6790",
+                "createTime": "2025-02-10 20:47:52",
+                "experimentId": "2",
+                "finishTime": "2025-05-02 15:48:32",
+                "id": 14,
+                "isCorrect": 1,
+                "name": "\u7b2c\u4e8c\u7ae0 \u8bed\u6cd5\u5206\u6790",
+                "score": 100,
+                "studentId": "2109104047"
+            },
+            "2": {
+                "code": "/* Input two numbers, output the product */\n#include <stdio.h>\nint main()\n{\n\tint x,y,m;\n\tprintf(\"Please input x and y\n\");\n\tscanf(\"%d%d\",&x,&y);\n\tm=x*y;\n\tprintf(\"%d * %d = %d\n\",x,y,m);\n\n\treturn 0;\n}",
+                "content": "\u8bcd\u6cd5\u5206\u6790",
+                "createTime": "2025-02-13 11:24:57",
+                "experimentId": "3",
+                "finishTime": "2025-05-02 15:48:32",
+                "id": 15,
+                "isCorrect": 1,
+                "name": "\u7b2c\u4e09\u6b21\u5b9e\u9a8c \u8bcd\u6cd5\u5206\u6790",
+                "score": 100,
+                "studentId": "2109104047"
+            },
+            "3": {
+                "code": "/* Input two numbers, output the product */\n#include <stdio.h>\nint main()\n{\n\tint x,y,m;\n\tprintf(\"Please input x and y\n\");\n\tscanf(\"%d%d\",&x,&y);\n\tm=x*y;\n\tprintf(\"%d * %d = %d\n\",x,y,m);\n\n\treturn 0;\n}",
+                "content": "\u7406\u89e3\u5e76\u638c\u63e1\u5c5e\u6027\u6587\u6cd5",
+                "createTime": "2025-02-26 19:43:32",
+                "experimentId": "4",
+                "finishTime": "2025-05-02 15:48:32",
+                "id": 16,
+                "isCorrect": 1,
+                "name": "\u7b2c\u56db\u7ae0 \u5c5e\u6027\u6587\u6cd5",
+                "score": 100,
+                "studentId": "2109104047"
+            },
+            "count": 4,
+            "info": "\u83b7\u53d6\u6210\u529f",
+            "result": "true"
         }
         ```
 5. 提交实验

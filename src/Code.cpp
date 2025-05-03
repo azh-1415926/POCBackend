@@ -171,15 +171,37 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
     auto str=req->getBody();
     
     Json::Value data;
-    std::vector<std::string> params={ "studentId" };
+    std::vector<std::string> params={ "userId" };
     
     if(!azh::drogon::checkParams(str.data(),params,data,callback,ret))
         return;
 
-    std::string studentId=data["studentId"].as<std::string>();
+    std::string userId=data["userId"].as<std::string>();
     auto clientPtr = drogon::app().getDbClient("POC");
 
-    const drogon::orm::Result &result=clientPtr->execSqlSync("select * from experiment_record where student_id='"+studentId+"'");
+    const drogon::orm::Result &resultOfUser=clientPtr->execSqlSync("select * from users where id='"+userId+"'");
+    int role=0;
+
+    for(auto r : resultOfUser)
+    {
+        role=r["role"].as<int>();
+    }
+
+    std::string query;
+    if(role==0)
+    {
+        query="select * from experiment_record where student_id='"+userId+"'";
+    }
+    else if(role==1)
+    {
+        query="select * from experiment_record where student_id in(select student_id from class where teacher_id in(select id from users where id='"+userId+"'))";
+    }
+    else if(role==2)
+    {
+        query="select * from experiment_record";
+    }
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
 
     int count=result.size();
 
@@ -199,6 +221,8 @@ void Code::getExperiment(const HttpRequestPtr &req, std::function<void(const Htt
         experiment["code"]=result.at(i)["code"].as<std::string>();
         experiment["createTime"]=resultOfInfo.at(0)["create_time"].as<std::string>();
         experiment["finishTime"]=result.at(i)["finish_time"].as<std::string>();
+        experiment["score"]=result.at(i)["score"].as<int>();
+        experiment["isCorrect"]=result.at(i)["isCorrect"].as<int>();
 
         ret[std::to_string(i)]=experiment;
     }
