@@ -425,7 +425,7 @@
 
 **题目模块**
 
-文档里已有接口：/Quiz/getquiz、/Quiz/getCollectedQuiz、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/getChapter
+文档里已有接口：/Quiz/getquiz、/Quiz/getCollectedQuiz、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/getChapter、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/addWrongQuiz、/Quiz/removeQuiz
 
 1. 获取题目
     * Url : `/Quiz/getquiz`
@@ -545,10 +545,94 @@
     * Response : 返回 name(string)、content(string)，如下所示:
         ```json
         {
-            "chapter":1,"info":"\u83b7\u53d6\u6210\u529f",
+            "chapter":6,
+            "info":"\u83b7\u53d6\u6210\u529f",
             "result":"true"
         }
         ```
+5. 收藏题目
+    * Url : `/Quiz/collectQuiz`
+    * Method : Post
+    * RequiredData : chapter(string)、data(array)、studentId(string)
+        ```json
+        {
+            "chapter": 1,
+            "data": [
+                0
+            ],
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 
+        ```json
+        {
+            "info":"\u6267\u884c\u6210\u529f",
+            "result":"true"
+        }
+        ```
+6. 取消收藏题目
+    * Url : `/Quiz/uncollectQuiz`
+    * Method : Post
+    * RequiredData : chapter(string)、data(array)、studentId(string)
+        ```json
+        {
+            "chapter": 1,
+            "data": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+            ],
+            "studentId": "2109104047"
+        }
+        ```
+    * Response : 
+        ```json
+        {
+            "info":"\u6267\u884c\u6210\u529f",
+            "result":"true"
+        }
+        ```
+
+7. 添加错题计数
+    * Url : `/Quiz/addWrongQuiz`
+    * Method : Post
+    * RequiredData : data(array)、studentId(string)
+        ```json
+        {
+        }
+        ```
+    * Response : 
+        ```json
+        //暂无
+        ```
+
+8. 删除错题计数
+    * Url : `/Quiz/removeQuiz`
+    * Method : Post
+    * RequiredData : data(array)、studentId(string)
+        ```json
+        {
+        }
+        ```
+    * Response : 
+        ```json
+        //暂无
+        ```
+
 **管理模块**
 
 文档里已有接口：/Manager/isValid?userId={1}、/Manager/addUser、/Manager/removeUser、/Manager/alterUser、/Manager/addClass、/Manager/removeClass、/Manager/alterClass、/Manager/getUser、/Manager/getClass、/Manager/statUser、/Manager/statClass、/Manager/statQuiz、/Manager/userBatch、/Manager/classBatch
