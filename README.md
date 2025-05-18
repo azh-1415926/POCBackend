@@ -425,7 +425,7 @@
 
 **题目模块**
 
-文档里已有接口：/Quiz/getquiz、/Quiz/getCollectedQuiz、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/getChapter、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/addWrongQuiz、/Quiz/removeQuiz
+文档里已有接口：/Quiz/getquiz、/Quiz/getCollectedQuiz、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/getChapter、/Quiz/collectQuiz、/Quiz/uncollectQuiz、/Quiz/addWrongQuiz、/Quiz/removeQuiz、/Quiz/getAnswer、/Quiz/getWrongQuiz
 
 1. 获取题目
     * Url : `/Quiz/getquiz`
@@ -624,6 +624,32 @@
     * Url : `/Quiz/removeQuiz`
     * Method : Post
     * RequiredData : data(array)、studentId(string)
+        ```json
+        {
+        }
+        ```
+    * Response : 
+        ```json
+        //暂无
+        ```
+
+8. 获取答案
+    * Url : `/Quiz/getAnswer`
+    * Method : Post
+    * RequiredData : 
+        ```json
+        {
+        }
+        ```
+    * Response : 
+        ```json
+        //暂无
+        ```
+
+9. 获取答案
+    * Url : `/Quiz/getWrongQuiz`
+    * Method : Post
+    * RequiredData : 
         ```json
         {
         }

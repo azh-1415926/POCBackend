@@ -206,7 +206,7 @@ void Quiz::addWrongQuiz(const HttpRequestPtr &req, std::function<void(const Http
     Json::Value ids=data["data"];
 
     int count=ids.size();
-    std::string strOfIds="(";
+    std::string strOfIds="";
 
     if(count==0)
     {
@@ -216,10 +216,10 @@ void Quiz::addWrongQuiz(const HttpRequestPtr &req, std::function<void(const Http
 
     for(int i=0;i<count-1;i++)
     {
-        strOfIds+="('"+studentId+"',"+std::to_string((ids[i].as<int>()+1))+",1),";
+        strOfIds+="('"+studentId+"',"+std::to_string((ids[i].as<int>()))+",1),";
     }
 
-    strOfIds+="('"+studentId+"',"+std::to_string((ids[count-1].as<int>()+1))+",1)";
+    strOfIds+="('"+studentId+"',"+std::to_string((ids[count-1].as<int>()))+",1)";
 
     std::string query="INSERT INTO wrong_quiz (student_id, quiz_id, wrong_count) "
         "VALUES "
@@ -334,7 +334,56 @@ void Quiz::getAnswer(const HttpRequestPtr &req, std::function<void(const HttpRes
     for (auto row : result)
     {
         Json::Value quiz;
+        quiz["id"]=row["id"].as<int>();
         quiz["answer"]=row["answer"].as<std::string>();
+
+        ret[std::to_string(count)]=quiz;
+
+        count++;
+    }
+
+    ret["count"]=count;
+    
+    azh::drogon::returnTrue(callback,"获取成功",ret);
+}
+
+void Quiz::getWrongQuiz(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    auto str=req->getBody();
+    
+    Json::Value data;
+    std::vector<std::string> params={ "studentId" };
+    
+    if(!azh::drogon::checkParams(str.data(),params,data,callback))
+        return;
+
+    std::string studentId=data["studentId"].as<std::string>();
+
+    Json::Value ret;
+    auto clientPtr = drogon::app().getDbClient("POC");
+
+    std::string query="SELECT * "
+        "FROM quiz q "
+        "WHERE id in("
+        "SELECT quiz_id from wrong_quiz "
+        "WHERE student_id = '"+studentId+"'"
+        ");";
+
+    const drogon::orm::Result &result=clientPtr->execSqlSync(query);
+
+    int count=0;
+
+    for (auto row : result)
+    {
+        Json::Value quiz;
+        quiz["type"]=row["type"].as<int>();
+        quiz["content"]=row["content"].as<std::string>();
+        quiz["A"]=row["optionA"].as<std::string>();
+        quiz["B"]=row["optionB"].as<std::string>();
+        quiz["C"]=row["optionC"].as<std::string>();
+        quiz["D"]=row["optionD"].as<std::string>();
+        // quiz["answer"]=row["answer"].as<std::string>();
+        quiz["collected"]=1;
 
         ret[std::to_string(count)]=quiz;
 

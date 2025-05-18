@@ -19,6 +19,8 @@ class Quiz : public drogon::HttpController<Quiz>
     METHOD_ADD(Quiz::addWrongQuiz,"/addWrongQuiz",Post);
     METHOD_ADD(Quiz::removeWrongQuiz,"/removeWrongQuiz",Post);
     METHOD_ADD(Quiz::getChapter,"/getChapter",Post);
+    METHOD_ADD(Quiz::getAnswer,"/getAnswer",Post);
+    METHOD_ADD(Quiz::getWrongQuiz,"/getWrongQuiz",Post);
 
     METHOD_LIST_END
     // your declaration of processing function maybe like this:
@@ -40,5 +42,7 @@ class Quiz : public drogon::HttpController<Quiz>
     void getChapter(const HttpRequestPtr &req,
               std::function<void (const HttpResponsePtr &)> &&callback);
     void getAnswer(const HttpRequestPtr &req,
+              std::function<void (const HttpResponsePtr &)> &&callback);
+    void getWrongQuiz(const HttpRequestPtr &req,
               std::function<void (const HttpResponsePtr &)> &&callback);
 };
